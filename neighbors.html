@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Neighbors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+    --bg:#F5F0E8;--card:#FFFFFF;--border:#E8E2D8;
+    --text:#3A3530;--text2:#9A948A;--text3:#C8C2B8;
+    --rose:#D08B86;--teal:#74B5AE;--gold:#D4AD5E;
+    --green:#6AB07A;--red:#D07070;
+}
+body{
+    font-family:'Quicksand',sans-serif;background:var(--bg);
+    display:flex;justify-content:center;min-height:100vh;min-height:100dvh;
+    color:var(--text);-webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+}
+#app{
+    width:100%;max-width:420px;display:flex;flex-direction:column;
+    align-items:center;padding:12px 16px 20px;
+}
+.date-header{font-size:14px;font-weight:600;color:var(--text2);letter-spacing:0.04em;margin-bottom:2px}
+.header{width:100%;display:flex;justify-content:center;padding:0 0 10px;position:relative}
+.title-block{text-align:center}
+.title{font-size:24px;font-weight:700;letter-spacing:0.12em;color:var(--text);margin-bottom:1px}
+.title .fire{font-size:18px;margin-left:3px;letter-spacing:0}
+.timer{font-size:17px;font-weight:600;color:var(--text2);letter-spacing:0.08em;font-variant-numeric:tabular-nums}
+.help-btn{
+    position:absolute;right:0;top:0;width:34px;height:34px;border-radius:50%;
+    border:2px solid var(--border);background:transparent;font-size:15px;font-weight:700;
+    color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-family:'Quicksand',sans-serif;transition:all .2s;
+}
+.help-btn:hover{border-color:var(--text2);color:var(--text)}
+.mode-bar{display:flex;gap:0;margin-bottom:8px;border:2px solid var(--border);border-radius:10px;overflow:hidden}
+.mode-btn{
+    padding:6px 20px;border:none;font-family:'Quicksand',sans-serif;
+    font-size:12px;font-weight:600;color:var(--text2);background:transparent;
+    cursor:pointer;transition:all .2s;letter-spacing:0.06em;
+}
+.mode-btn.active{background:var(--text);color:var(--bg)}
+.diff-bar{display:flex;gap:4px;margin-bottom:12px;background:var(--border);border-radius:10px;padding:3px}
+.diff-btn{
+    padding:5px 16px;border-radius:8px;border:none;font-family:'Quicksand',sans-serif;
+    font-size:12px;font-weight:600;color:var(--text2);background:transparent;
+    cursor:pointer;transition:all .2s;letter-spacing:0.06em;
+}
+.diff-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.grid-wrap{
+    background:var(--border);border-radius:14px;padding:3px;
+    box-shadow:0 2px 16px rgba(0,0,0,0.04);display:inline-block;position:relative;
+}
+.grid{display:grid;gap:2px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.cell{
+    display:flex;align-items:center;justify-content:center;
+    border-radius:6px;cursor:pointer;position:relative;
+    transition:background .15s,transform .1s;-webkit-tap-highlight-color:transparent;
+}
+.cell:active{transform:scale(0.90)}
+.cell.empty-cell{background:var(--card)}
+.cell.empty-cell:hover{background:#FAF8F4}
+.cell.clue{cursor:default}.cell.clue:active{transform:none}
+.cell .num{font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.15);transition:all .2s}
+.cell .num.satisfied{text-shadow:0 0 8px rgba(255,255,255,0.6),0 1px 3px rgba(0,0,0,0.15)}
+.cell .num.exceeded{color:#fdd;text-shadow:0 0 6px rgba(200,50,50,0.4)}
+.cell.player-filled{opacity:0.8}
+.cell.erasable{box-shadow:inset 0 0 0 2px rgba(160,150,140,0.3)}
+.bg-rose{background:var(--rose)}.bg-teal{background:var(--teal)}.bg-gold{background:var(--gold)}
+.dots{position:absolute;bottom:2px;left:0;right:0;display:flex;gap:2px;justify-content:center;pointer-events:none}
+.dot{width:6px;height:6px;border-radius:50%;opacity:0.55;transition:opacity .2s}
+.dot.elim{opacity:0.12}
+.toggle-row{display:flex;align-items:center;gap:8px;margin:10px 0 2px;font-size:12px;font-weight:600;color:var(--text2);letter-spacing:0.04em}
+.toggle{width:38px;height:22px;border-radius:11px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--teal)}
+.toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--card);transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.toggle.on .toggle-knob{left:18px}
+.legend{display:flex;gap:16px;justify-content:center;margin:8px 0 2px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+.msg{margin-top:8px;font-size:15px;font-weight:700;min-height:22px;color:var(--green);text-align:center;letter-spacing:0.04em}
+.toolbar{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.tool-btn{
+    width:60px;height:52px;border-radius:12px;border:2px solid var(--border);
+    background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;transition:all .2s;position:relative;gap:1px;font-family:'Quicksand',sans-serif;
+}
+.tool-btn:hover{border-color:var(--text3)}
+.tool-btn:active{transform:scale(0.94)}
+.tool-btn.active{border-color:var(--text2);background:#F8F6F0}
+.tool-btn svg{width:20px;height:20px;stroke:var(--text2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.tool-btn.active svg{stroke:var(--text)}
+.tool-btn .badge{position:absolute;top:-5px;right:-5px;background:var(--card);border:1.5px solid var(--border);border-radius:5px;padding:1px 4px;font-size:8px;font-weight:700;color:var(--text2);letter-spacing:0.04em}
+.tool-label{font-size:8px;font-weight:600;color:var(--text3);letter-spacing:0.04em}
+.new-btn{
+    margin-top:10px;padding:7px 20px;border-radius:8px;border:2px solid var(--border);
+    background:transparent;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:600;
+    color:var(--text2);cursor:pointer;transition:all .2s;letter-spacing:0.06em;
+}
+.new-btn:hover{border-color:var(--text2);color:var(--text)}
+.new-btn:active{transform:scale(0.96)}
+.hidden{display:none!important}
+.loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(245,240,232,0.7);border-radius:14px;z-index:5}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes cellWin{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1)}}
+.cell.won-anim{animation:cellWin .35s ease}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 0 0 rgba(106,176,122,0.4)}50%{box-shadow:0 0 0 5px rgba(106,176,122,0)}}
+.cell.hinted{animation:hintPulse .6s ease}
+.overlay{position:fixed;inset:0;background:rgba(58,53,48,0.4);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.overlay.show{display:flex}
+.rules-card{background:var(--bg);border-radius:18px;padding:24px 20px 18px;max-width:320px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.12);text-align:center}
+.rules-card h2{font-size:18px;font-weight:700;margin-bottom:12px;letter-spacing:0.06em}
+.rules-text{font-size:12.5px;line-height:1.8;color:var(--text);text-align:left;margin-bottom:6px}
+.rules-text b{color:var(--text);font-weight:700}
+.rules-example{display:inline-grid;grid-template-columns:repeat(3,38px);gap:2px;margin:10px auto;background:var(--border);border-radius:7px;padding:3px}
+.rules-example .ex-cell{width:38px;height:38px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.15)}
+.got-it{margin-top:14px;padding:9px 36px;border-radius:10px;border:none;background:var(--text);color:var(--bg);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.06em;transition:opacity .2s}
+.got-it:hover{opacity:0.85}.got-it:active{transform:scale(0.97)}
+@media(max-height:700px){
+    #app{padding:6px 12px 12px}.header{padding:0 0 6px}
+    .title{font-size:20px}.timer{font-size:15px}
+    .toolbar{margin-top:8px}.tool-btn{width:54px;height:46px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+    <div class="date-header" id="dateHeader"></div>
+    <div class="header">
+        <div class="title-block">
+            <div class="title">Neighbors<span class="fire">🔥</span></div>
+            <div class="timer" id="timer">00:00</div>
+        </div>
+        <button class="help-btn" onclick="toggleRules()" aria-label="Help">?</button>
+    </div>
+    <div class="mode-bar">
+        <button class="mode-btn active" id="mDaily" onclick="setMode('daily')">📅 Daily</button>
+        <button class="mode-btn" id="mPractice" onclick="setMode('practice')">🎲 Practice</button>
+    </div>
+    <div class="diff-bar" id="diffDaily">
+        <button class="diff-btn active" id="dStd" onclick="goDaily('standard')">Standard</button>
+        <button class="diff-btn" id="dHard" onclick="goDaily('hard')">Hard</button>
+    </div>
+    <div class="diff-bar hidden" id="diffPractice">
+        <button class="diff-btn" id="dp5" onclick="goPractice(5)">5×5</button>
+        <button class="diff-btn active" id="dp6" onclick="goPractice(6)">6×6</button>
+        <button class="diff-btn" id="dp7" onclick="goPractice(7)">7×7</button>
+        <button class="diff-btn" id="dp8" onclick="goPractice(8)">8×8</button>
+    </div>
+    <div class="grid-wrap">
+        <div class="grid" id="grid"></div>
+        <div class="loading" id="loading"><div class="spinner"></div></div>
+    </div>
+    <div class="toggle-row">
+        <span>Auto-fill dots</span>
+        <div class="toggle" id="afToggle" onclick="toggleAutoFill()"><div class="toggle-knob"></div></div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="msg" id="msg"></div>
+    <div class="toolbar">
+        <button class="tool-btn" id="eraserBtn" onclick="toggleEraser()" aria-label="Eraser">
+            <svg viewBox="0 0 24 24"><path d="M20 20H7l-4-4a1.4 1.4 0 010-2L15.3 1.7a1.4 1.4 0 012 0L21.3 5.7a1.4 1.4 0 010 2L12 17"/><path d="M6 11l7 7"/></svg>
+            <span class="tool-label">Erase</span>
+        </button>
+        <button class="tool-btn" id="undoBtn" onclick="undo()" aria-label="Undo">
+            <svg viewBox="0 0 24 24"><path d="M3 10h13a4 4 0 010 8H9"/><path d="M7 14l-4-4 4-4"/></svg>
+            <span class="tool-label">Undo</span>
+        </button>
+        <button class="tool-btn" id="hintBtn" onclick="hint()" aria-label="Hint">
+            <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V16h8v-1.3A7 7 0 0012 2z"/></svg>
+            <span class="badge">Free</span>
+            <span class="tool-label">Hint</span>
+        </button>
+    </div>
+    <button class="new-btn hidden" id="newBtn" onclick="goPractice(SZ)">New puzzle</button>
+</div>
+<div class="overlay" id="overlay" onclick="if(event.target===this)toggleRules()">
+    <div class="rules-card">
+        <h2>How to Play</h2>
+        <div class="rules-text">
+            Fill the grid with <b>3 colors</b> so every numbered cell is satisfied.
+            <br><br>
+            Each number tells how many <b>orthogonal neighbors</b> (↑↓←→) share that cell's color.
+        </div>
+        <div class="rules-example" id="rulesEx"></div>
+        <div class="rules-text" style="font-size:11.5px;color:var(--text2);margin-top:4px;text-align:center">
+            The <b style="color:#4A8A84">teal 2</b> has exactly 2 teal neighbors.<br>Tap empty cells to cycle colors.
+        </div>
+        <button class="got-it" onclick="toggleRules()">Got it</button>
+    </div>
+</div>
+<script>
+const COLS=[
+    {hex:'#D08B86',name:'Rose',cls:'bg-rose'},
+    {hex:'#74B5AE',name:'Teal',cls:'bg-teal'},
+    {hex:'#D4AD5E',name:'Gold',cls:'bg-gold'}
+];
+const NC=3,DR=[[-1,0],[1,0],[0,-1],[0,1]];
+function mulberry32(seed){
+    return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+}
+let rng=Math.random;
+let SZ=6,sol=null,cg=null,pg=null,won=false;
+let tStart=0,timerInterval=null;
+let history=[],eraserMode=false,hintsUsed=0;
+let autoFill=false,mode='daily',dailyDiff='standard';
+
+function ib(r,c){return r>=0&&r<SZ&&c>=0&&c<SZ}
+function ns(r,c){return DR.map(([dr,dc])=>[r+dr,c+dc]).filter(([a,b])=>ib(a,b))}
+function csame(g,r,c){const v=g[r][c];let n=0;for(const[nr,nc]of ns(r,c))if(g[nr][nc]===v)n++;return n}
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=0|rng()*(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function getDailySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}
+function formatDate(){
+    const d=new Date();
+    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return days[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+' '+months[d.getMonth()];
+}
+function startTimer(){
+    tStart=Date.now();if(timerInterval)clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{if(!won&&tStart)document.getElementById('timer').textContent=fmtTime(Date.now()-tStart);},200);
+}
+function fmtTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),ss=s%60;return(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;}
+function solve(cg,mx=2){
+    const doms=Array.from({length:SZ},(_,r)=>Array.from({length:SZ},(_,c)=>{
+        if(cg[r][c]!==null)return new Set([cg[r][c].color]);const s=new Set();for(let i=0;i<NC;i++)s.add(i);return s;
+    }));
+    function cln(d){return d.map(r=>r.map(s=>new Set(s)))}
+    function prop(d){
+        let ch=true;while(ch){ch=false;
+            for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++){
+                if(!cg[r][c])continue;const{color:col,count:cnt}=cg[r][c];const nbs=ns(r,c);
+                let def=0,unc=[],dif=0;
+                for(const[nr,nc]of nbs){if(d[nr][nc].size===1){if(d[nr][nc].has(col))def++;else dif++;}else{if(d[nr][nc].has(col))unc.push([nr,nc]);else dif++;}}
+                if(def>cnt)return false;if(def+unc.length<cnt)return false;
+                if(def===cnt){for(const[nr,nc]of unc)if(d[nr][nc].delete(col)){ch=true;if(!d[nr][nc].size)return false}}
+                if(def+unc.length===cnt){for(const[nr,nc]of unc)if(d[nr][nc].size>1){d[nr][nc]=new Set([col]);ch=true}}
+            }
+            for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++)if(d[r][c].size===0)return false;
+        }return true;
+    }
+    let sols=0,calls=0;
+    function bt(d){
+        if(sols>=mx||calls>500000)return;calls++;
+        let best=null,bs=NC+1;
+        for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++)if(!cg[r][c]&&d[r][c].size>1&&d[r][c].size<bs){bs=d[r][c].size;best=[r,c]}
+        if(!best){let ok=true;for(let r=0;r<SZ&&ok;r++)for(let c=0;c<SZ&&ok;c++){if(!cg[r][c])continue;const{color:col,count:cnt}=cg[r][c];let n=0;for(const[nr,nc]of ns(r,c))if([...d[nr][nc]][0]===col)n++;if(n!==cnt)ok=false;}if(ok)sols++;return;}
+        const[br,bc]=best;for(const v of[...d[br][bc]]){const nd=cln(d);nd[br][bc]=new Set([v]);if(prop(nd))bt(nd);}
+    }
+    const d0=cln(doms);if(!prop(d0))return 0;bt(d0);return Math.min(sols,mx);
+}
+function genPuzzle(){
+    const T=Date.now(),LIM=SZ>=8?15000:6000;
+    for(let att=0;att<80;att++){
+        if(Date.now()-T>LIM)break;
+        const filled=Array.from({length:SZ},()=>Array.from({length:SZ},()=>0|rng()*NC));
+        const full=Array.from({length:SZ},(_,r)=>Array.from({length:SZ},(_,c)=>({color:filled[r][c],count:csame(filled,r,c)})));
+        const clues=full.map(r=>r.map(v=>({...v})));const cells=[];
+        for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++)cells.push([r,c]);shuf(cells);
+        for(const[r,c]of cells){if(Date.now()-T>LIM)break;const sv=clues[r][c];clues[r][c]=null;if(solve(clues,2)!==1)clues[r][c]=sv;}
+        let cnt=0,emp=0;for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++){if(clues[r][c]!==null)cnt++;else emp++;}
+        if(emp>=3)return{solution:filled,clues,clueCount:cnt,emptyCount:emp};
+    }return null;
+}
+function computeDots(){
+    if(!cg||!pg)return null;
+    // 1-step only: each empty cell checks its direct clue neighbors
+    const d=Array.from({length:SZ},(_,r)=>Array.from({length:SZ},(_,c)=>{
+        if(cg[r][c]!==null)return new Set([cg[r][c].color]);
+        if(pg[r][c]>=0)return new Set([pg[r][c]]);
+        return new Set([0,1,2]);
+    }));
+    // Single pass: for each clue, eliminate from undecided neighbors
+    for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++){
+        if(!cg[r][c])continue;
+        const{color:col,count:cnt}=cg[r][c];
+        const nbs=ns(r,c);
+        let def=0,unc=[];
+        for(const[nr,nc]of nbs){
+            const v=cg[nr][nc]?cg[nr][nc].color:pg[nr][nc];
+            if(v>=0){if(v===col)def++;}
+            else unc.push([nr,nc]);
+        }
+        // Already satisfied: remove this color from undecided neighbors
+        if(def===cnt){
+            for(const[nr,nc]of unc) d[nr][nc].delete(col);
+        }
+        // All undecided must be this color to satisfy
+        if(def+unc.length===cnt){
+            for(const[nr,nc]of unc){
+                if(d[nr][nc].size>1) d[nr][nc]=new Set([col]);
+            }
+        }
+    }
+    return d;
+}
+function cellSize(){const mw=Math.min(window.innerWidth-40,388);return Math.floor((mw-(SZ+1)*2)/SZ)}
+function render(){
+    const grid=document.getElementById('grid');const sz=cellSize();
+    grid.style.gridTemplateColumns=`repeat(${SZ},${sz}px)`;grid.innerHTML='';
+    const dots=autoFill?computeDots():null;
+    for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++){
+        const el=document.createElement('div');el.className='cell';el.style.width=el.style.height=sz+'px';el.style.fontSize=(sz*.34)+'px';
+        if(cg[r][c]!==null){
+            const{color:col,count:cnt}=cg[r][c];el.classList.add('clue',COLS[col].cls);
+            const nbs=ns(r,c);let cur=0,allDet=true;
+            for(const[nr,nc]of nbs){const v=cg[nr][nc]?cg[nr][nc].color:pg[nr][nc];if(v===col)cur++;if(cg[nr][nc]===null&&pg[nr][nc]<0)allDet=false;}
+            const num=document.createElement('span');num.className='num';num.textContent=cnt;
+            if(cur===cnt&&allDet)num.classList.add('satisfied');else if(cur>cnt)num.classList.add('exceeded');
+            el.appendChild(num);
+        }else{
+            const v=pg[r][c];
+            if(v>=0){el.classList.add('player-filled',COLS[v].cls);}
+            else{el.classList.add('empty-cell');
+                if(dots&&dots[r]&&dots[r][c]&&dots[r][c].size<NC){
+                    const dw=document.createElement('div');dw.className='dots';
+                    for(let i=0;i<NC;i++){const dt=document.createElement('div');dt.className='dot'+(dots[r][c].has(i)?'':' elim');dt.style.background=COLS[i].hex;dw.appendChild(dt);}
+                    el.appendChild(dw);
+                }
+            }
+            if(eraserMode&&v>=0)el.classList.add('erasable');
+            if(!won){const R=r,C=c;el.addEventListener('click',()=>cellClick(R,C));}
+        }
+        grid.appendChild(el);
+    }checkWin();
+}
+function cellClick(r,c){
+    if(won)return;const prev=pg[r][c];
+    if(eraserMode){if(prev>=0){history.push({r,c,prev});pg[r][c]=-1;}}
+    else{history.push({r,c,prev});pg[r][c]=prev<0?0:(prev+1>=NC?-1:prev+1);}
+    render();
+}
+function undo(){if(won||!history.length)return;const last=history.pop();pg[last.r][last.c]=last.prev;render();}
+function hint(){
+    if(won||!sol)return;
+    if(hintsUsed>=1){document.getElementById('msg').innerHTML='💎 More hints with Premium';document.getElementById('msg').style.color='var(--text2)';setTimeout(()=>{if(!won)document.getElementById('msg').innerHTML='';},2000);return;}
+    const empty=[];for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++)if(cg[r][c]===null&&pg[r][c]!==sol[r][c])empty.push([r,c]);
+    if(!empty.length)return;const[r,c]=empty[Math.floor(Math.random()*empty.length)];
+    history.push({r,c,prev:pg[r][c]});pg[r][c]=sol[r][c];hintsUsed++;
+    document.querySelector('#hintBtn .badge').textContent='💎';document.getElementById('hintBtn').style.opacity='0.5';
+    render();const idx=r*SZ+c;const cells=document.querySelectorAll('.cell');if(cells[idx])cells[idx].classList.add('hinted');
+}
+function toggleEraser(){eraserMode=!eraserMode;document.getElementById('eraserBtn').classList.toggle('active',eraserMode);render();}
+function toggleAutoFill(){autoFill=!autoFill;document.getElementById('afToggle').classList.toggle('on',autoFill);render();}
+function checkWin(){
+    if(won)return;
+    for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++)if(cg[r][c]===null&&pg[r][c]<0)return;
+    let ok=true;for(let r=0;r<SZ&&ok;r++)for(let c=0;c<SZ&&ok;c++){
+        if(!cg[r][c])continue;const{color:col,count:cnt}=cg[r][c];let cur=0;
+        for(const[nr,nc]of ns(r,c)){const v=cg[nr][nc]?cg[nr][nc].color:pg[nr][nc];if(v===col)cur++;}
+        if(cur!==cnt)ok=false;
+    }
+    if(ok){won=true;if(timerInterval)clearInterval(timerInterval);const el=fmtTime(Date.now()-tStart);
+        document.getElementById('timer').textContent=el;document.getElementById('msg').innerHTML='🎉 Solved in '+el;
+        document.querySelectorAll('.cell').forEach((e,i)=>setTimeout(()=>e.classList.add('won-anim'),i*20));
+    }
+}
+function renderLegend(){
+    const leg=document.getElementById('legend');leg.innerHTML='';
+    for(let i=0;i<NC;i++){const it=document.createElement('div');it.className='leg-item';
+        const dt=document.createElement('div');dt.className='leg-dot';dt.style.background=COLS[i].hex;
+        const tx=document.createElement('span');tx.textContent=COLS[i].name;
+        it.appendChild(dt);it.appendChild(tx);leg.appendChild(it);}
+}
+function buildRulesExample(){
+    const ex=document.getElementById('rulesEx');
+    [{c:0},{c:1},{c:2},{c:0},{c:1,n:2},{c:0},{c:2},{c:1},{c:0}].forEach(x=>{
+        const d=document.createElement('div');d.className='ex-cell';d.style.background=COLS[x.c].hex;
+        if(x.n!==undefined)d.textContent=x.n;ex.appendChild(d);});
+}
+function toggleRules(){document.getElementById('overlay').classList.toggle('show')}
+function setMode(m){
+    mode=m;
+    document.getElementById('mDaily').classList.toggle('active',m==='daily');
+    document.getElementById('mPractice').classList.toggle('active',m==='practice');
+    document.getElementById('diffDaily').classList.toggle('hidden',m!=='daily');
+    document.getElementById('diffPractice').classList.toggle('hidden',m!=='practice');
+    document.getElementById('newBtn').classList.toggle('hidden',m!=='practice');
+    if(m==='daily')goDaily(dailyDiff);else goPractice(SZ>=5&&SZ<=8?SZ:6);
+}
+function goDaily(diff){
+    dailyDiff=diff;SZ=diff==='hard'?8:6;
+    document.getElementById('dStd').classList.toggle('active',diff==='standard');
+    document.getElementById('dHard').classList.toggle('active',diff==='hard');
+    rng=mulberry32(getDailySeed()*(diff==='hard'?7:3));
+    startGeneration();
+}
+function goPractice(sz){
+    SZ=sz;document.querySelectorAll('#diffPractice .diff-btn').forEach(b=>b.classList.remove('active'));
+    const b=document.getElementById('dp'+sz);if(b)b.classList.add('active');
+    rng=Math.random;startGeneration();
+}
+function startGeneration(){
+    won=false;history=[];eraserMode=false;hintsUsed=0;
+    document.getElementById('eraserBtn').classList.remove('active');
+    document.querySelector('#hintBtn .badge').textContent='Free';
+    document.getElementById('hintBtn').style.opacity='1';
+    document.getElementById('msg').innerHTML='';document.getElementById('msg').style.color='var(--green)';
+    document.getElementById('loading').style.display='flex';renderLegend();
+    setTimeout(()=>{
+        const p=genPuzzle();
+        if(p){sol=p.solution;cg=p.clues;pg=Array.from({length:SZ},()=>Array(SZ).fill(-1));startTimer();render();}
+        else{document.getElementById('msg').innerHTML='Generation timed out — try again';document.getElementById('msg').style.color='var(--red)';}
+        document.getElementById('loading').style.display='none';
+    },30);
+}
+document.getElementById('dateHeader').textContent=formatDate();
+buildRulesExample();goDaily('standard');
+</script>
+</body>
+</html>
