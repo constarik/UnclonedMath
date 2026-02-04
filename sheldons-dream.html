@@ -3,2166 +3,611 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sheldon's Dream</title>
+  <title>Sheldon's Dream — Pack Dominance Slot</title>
+  <meta name="description" content="5-way weapon dominance on a 6×6 grid. Adjacent symbols form packs, hunt prey, then cannibalize their own kind. Original slot mechanics by Uncloned Math.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
-      --bg: #0f3515;
-      --grid-bg: #123a1c;
-      --cell-bg: #1a4525;
-      --border: #3a6545;
+      --bg: #0a1f0e;
+      --bg-card: rgba(18, 58, 28, 0.6);
+      --border: rgba(58, 101, 69, 0.4);
+      --gold: #f1c40f;
+      --gold-dim: #c9a80a;
+      --text: #d4e8d0;
+      --text-muted: #7a9f7a;
       --rock: #8b7355;
       --paper: #e8e8e8;
       --scissors: #c0392b;
       --lizard: #27ae60;
       --spock: #3498db;
-      --glow: rgba(255, 255, 255, 0.1);
-      --active: #f1c40f;
+      --red-glow: rgba(192, 57, 43, 0.3);
     }
-    
+
     body {
       font-family: 'Rajdhani', sans-serif;
       background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      overflow: hidden;
-      transition: background 0.5s ease;
+      overflow-x: hidden;
     }
-    
+
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(ellipse at 20% 20%, rgba(50, 180, 120, 0.18) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(40, 150, 100, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(60, 160, 110, 0.12) 0%, transparent 60%);
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(50, 180, 120, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 90%, rgba(241, 196, 15, 0.06) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 50%, rgba(60, 160, 110, 0.08) 0%, transparent 60%);
       pointer-events: none;
-      transition: background 0.5s ease;
+      z-index: 0;
     }
-    
-    body.phase-cannibalism {
-      background: #200a15;
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
     }
-    
-    body.phase-cannibalism::before {
-      background: 
-        radial-gradient(ellipse at 30% 30%, rgba(255, 40, 80, 0.3) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 70%, rgba(200, 30, 200, 0.25) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(220, 20, 100, 0.2) 0%, transparent 70%);
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 2;
     }
-    
-    body.phase-cannibalism .grid-wrapper {
-      border-color: rgba(255, 50, 100, 0.3);
-      box-shadow: 
-        0 20px 60px rgba(150, 0, 50, 0.4),
-        inset 0 1px 0 rgba(255, 100, 150, 0.1);
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 0;
     }
-    
+
+    .weapons-orbit {
+      font-size: 2.5rem;
+      letter-spacing: 0.4em;
+      margin-bottom: 2rem;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .weapons-orbit span {
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+    .weapons-orbit span:nth-child(1) { animation-delay: 0s; }
+    .weapons-orbit span:nth-child(2) { animation-delay: 0.3s; }
+    .weapons-orbit span:nth-child(3) { animation-delay: 0.6s; }
+    .weapons-orbit span:nth-child(4) { animation-delay: 0.9s; }
+    .weapons-orbit span:nth-child(5) { animation-delay: 1.2s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
     h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
+      font-size: clamp(2.5rem, 6vw, 4rem);
       font-weight: 900;
-      letter-spacing: 0.3em;
-      margin-bottom: 0.5rem;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      background: linear-gradient(135deg, #f1c40f, #e67e22);
+      background: linear-gradient(135deg, var(--gold), #e67e22, var(--gold));
+      background-size: 200% 100%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      animation: shimmer 4s ease-in-out infinite, fadeInUp 0.8s ease-out 0.2s both;
+      margin-bottom: 0.5rem;
     }
-    
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
     .subtitle {
-      font-size: 0.9rem;
-      color: #666;
-      letter-spacing: 0.2em;
-      margin-bottom: 2rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.5em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
     }
-    
-    .game-container {
-      display: flex;
-      gap: 3rem;
-      align-items: flex-start;
+
+    .hero-desc {
+      font-size: 1.3rem;
+      font-weight: 300;
+      line-height: 1.8;
+      max-width: 560px;
+      color: var(--text);
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s ease-out 0.6s both;
     }
-    
-    .grid-wrapper {
-      background: var(--grid-bg);
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    .hero-desc strong {
+      color: var(--gold);
+      font-weight: 700;
     }
-    
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(6, 60px);
-      grid-template-rows: repeat(6, 60px);
-      gap: 4px;
-    }
-    
-    .cell {
-      width: 60px;
-      height: 60px;
-      background: var(--cell-bg);
-      border-radius: 6px;
-      display: flex;
+
+    .play-btn {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      transition: all 0.2s ease;
+      gap: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: linear-gradient(135deg, var(--gold), #e67e22);
+      padding: 18px 48px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.8s ease-out 0.8s both;
       position: relative;
-      cursor: default;
+      overflow: hidden;
     }
-    
-    .cell::after {
+
+    .play-btn::before {
       content: '';
       position: absolute;
       inset: 0;
-      border-radius: 6px;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-      pointer-events: none;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
     }
-    
-    .cell.empty {
-      background: #0a2510;
+
+    .play-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(241, 196, 15, 0.3);
+      text-decoration: none;
     }
-    
-    .cell.active {
-      animation: pulse 0.5s ease infinite alternate;
-      box-shadow: 0 0 20px var(--active), inset 0 0 10px rgba(241, 196, 15, 0.3);
-      z-index: 10;
+
+    .play-btn:hover::before {
+      transform: translateX(100%);
     }
-    
-    .cell.hunting {
-      animation: hunt 0.3s ease;
-    }
-    
-    .cell.eaten {
-      animation: eaten 0.3s ease forwards;
-    }
-    
-    .cell.merging {
-      animation: merge 0.7s ease;
-      z-index: 20;
-    }
-    
-    .cell.dissolve {
-      animation: dissolve 0.7s ease forwards;
-    }
-    
-    @keyframes merge {
-      0% { transform: scale(1); filter: brightness(1); }
-      30% { transform: scale(1.3); filter: brightness(2); }
-      60% { transform: scale(1.4); filter: brightness(2.5) blur(1px); }
-      100% { transform: scale(1.1); filter: brightness(1.3); }
-    }
-    
-    @keyframes dissolve {
-      0% { transform: scale(1.1); opacity: 1; filter: blur(0) brightness(1.5); }
-      30% { transform: scale(1.2); opacity: 0.8; filter: blur(2px); }
-      100% { transform: scale(0); opacity: 0; filter: blur(10px); }
-    }
-    
-    .flying-hunter {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      background: var(--cell-bg);
-      border-radius: 6px;
-      box-shadow: 0 0 30px var(--active);
-    }
-    
-    .flying-hunter.merging {
-      animation: merge 0.7s ease;
-    }
-    
-    .flying-hunter.dissolve {
-      animation: dissolve 0.7s ease forwards;
-    }
-    
-    .blend-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .blend-victim, .blend-hunter {
+
+    .scroll-hint {
       position: absolute;
-      font-size: 2rem;
-      transition: all 0.5s ease;
-    }
-    
-    .blend-victim {
-      z-index: 1;
-    }
-    
-    .blend-hunter {
-      z-index: 2;
-      filter: drop-shadow(0 0 10px var(--active));
-    }
-    
-    .cell.blending {
-      animation: blendPulse 0.8s ease;
-      box-shadow: 0 0 30px var(--active), 0 0 60px rgba(241, 196, 15, 0.3);
-    }
-    
-    @keyframes blendPulse {
-      0% { transform: scale(1); filter: brightness(1); }
-      25% { transform: scale(1.2); filter: brightness(1.5); }
-      50% { transform: scale(1.3); filter: brightness(2); }
-      75% { transform: scale(1.2); filter: brightness(1.5); }
-      100% { transform: scale(1.1); filter: brightness(1.2); }
-    }
-    
-    .blend-victim.fade-out {
-      animation: victimFade 0.5s ease forwards;
-    }
-    
-    @keyframes victimFade {
-      0% { opacity: 1; transform: scale(1); filter: blur(0); }
-      100% { opacity: 0; transform: scale(0.5); filter: blur(8px); }
-    }
-    
-    .cell.pack {
-      box-shadow: 0 0 15px var(--active);
-    }
-    
-    .cell.poison:not(.empty) {
-      background: linear-gradient(135deg, #4a1a1a, #3a1515);
-      box-shadow: inset 0 0 12px rgba(200, 50, 50, 0.4);
-    }
-    
-    .cell.alpha {
-      box-shadow: 0 0 20px #9b59b6, inset 0 0 15px rgba(155, 89, 182, 0.4);
-      animation: alphaPulse 0.3s ease infinite alternate;
-    }
-    
-    .cell.alpha-trail {
-      background: rgba(155, 89, 182, 0.3) !important;
-      box-shadow: 0 0 10px #9b59b6;
-    }
-    
-    .flying-alpha {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      background: rgba(155, 89, 182, 0.8);
-      border-radius: 6px;
-      box-shadow: 0 0 40px #9b59b6, 0 0 80px rgba(155, 89, 182, 0.5);
-    }
-    
-    .cell.alpha-blend {
-      box-shadow: 0 0 30px #9b59b6, 0 0 60px rgba(155, 89, 182, 0.4) !important;
-    }
-    
-    body.alpha-flash {
-      animation: alphaScreenFlash 0.5s ease;
-    }
-    
-    body.alpha-flash::after {
-      content: '💀 ALPHA';
-      position: fixed;
-      top: 50%;
+      bottom: 40px;
       left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 4rem;
-      font-weight: 900;
-      color: #9b59b6;
-      text-shadow: 0 0 30px #9b59b6, 0 0 60px #9b59b6;
-      z-index: 1000;
-      animation: alphaTextPulse 0.5s ease;
-    }
-    
-    @keyframes alphaScreenFlash {
-      0% { background: var(--bg); }
-      50% { background: rgba(155, 89, 182, 0.3); }
-      100% { background: var(--bg); }
-    }
-    
-    @keyframes alphaTextPulse {
-      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-    }
-    
-    @keyframes alphaPulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
-    }
-    
-    .log-entry.alpha {
-      color: #9b59b6;
-    }
-    
-    @keyframes pulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.08); }
-    }
-    
-    @keyframes hunt {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    
-    @keyframes eaten {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0); opacity: 0; }
-    }
-    
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    
-    .stats {
-      background: var(--grid-bg);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      min-width: 200px;
-    }
-    
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-    
-    .stat-label {
-      color: #888;
-      font-size: 0.9rem;
-    }
-    
-    .stat-value {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      color: var(--active);
-    }
-    
-    .legend {
-      background: var(--grid-bg);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    
-    .legend h3 {
-      font-size: 0.8rem;
-      color: #666;
-      letter-spacing: 0.15em;
-      margin-bottom: 1rem;
-    }
-    
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.4rem 0;
-      font-size: 0.85rem;
-    }
-    
-    .legend-symbol {
-      font-size: 1.3rem;
-      width: 30px;
-      text-align: center;
-    }
-    
-    .legend-beats {
-      color: #666;
-      font-size: 0.75rem;
-    }
-    
-    .controls {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    
-    button {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-    }
-    
-    .btn-spin {
-      background: linear-gradient(135deg, #f1c40f, #e67e22);
-      color: #000;
-    }
-    
-    .btn-spin:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(241, 196, 15, 0.3);
-    }
-    
-    .btn-spin:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .btn-reset {
-      background: var(--grid-bg);
-      color: #888;
-      border: 1px solid var(--border);
-    }
-    
-    .btn-reset:hover {
-      color: #fff;
-      border-color: #444;
-    }
-    
-    .btn-info {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--grid-bg);
-      color: #f1c40f;
-      border: 2px solid #f1c40f;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      margin-left: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      padding: 0;
-    }
-    
-    .btn-info:hover {
-      background: #f1c40f;
-      color: #000;
-    }
-    
-    .info-popup {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      overflow-y: auto;
-    }
-    
-    .info-popup.show {
-      display: flex;
-    }
-    
-    .info-content {
-      background: var(--grid-bg);
-      border-radius: 16px;
-      padding: 2rem;
-      max-width: 500px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-    
-    .info-content h2 {
-      color: #f1c40f;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    
-    .info-content h3 {
-      color: #4ade80;
-      margin: 1.5rem 0 0.5rem;
-      font-size: 1rem;
-    }
-    
-    .info-content p {
-      color: #ccc;
-      line-height: 1.6;
-      margin-bottom: 0.5rem;
-    }
-    
-    .info-paytable {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-    }
-    
-    .info-paytable th, .info-paytable td {
-      padding: 0.5rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .info-paytable th {
-      color: #f1c40f;
-    }
-    
-    .info-paytable td {
-      color: #fff;
-    }
-    
-    .info-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      color: #888;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    
-    .info-close:hover {
-      color: #fff;
-    }
-    
-    .betting-panel {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-bottom: 1rem;
-      padding: 1rem 1.5rem;
-      background: var(--grid-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    
-    .balance-display, .bet-display {
+      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 8px;
+      animation: fadeIn 1s ease-out 1.5s both;
     }
-    
-    .balance-label, .bet-label {
+
+    .scroll-hint span {
       font-size: 0.7rem;
-      color: #666;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      color: var(--text-muted);
     }
-    
-    .balance-value {
+
+    .scroll-arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 2px solid var(--text-muted);
+      border-bottom: 2px solid var(--text-muted);
+      transform: rotate(45deg);
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.5; }
+      50% { transform: rotate(45deg) translate(4px, 4px); opacity: 1; }
+    }
+
+    section { padding: 100px 0; }
+
+    .section-label {
       font-family: 'Orbitron', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #4ade80;
+      font-size: 0.65rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1.5rem;
     }
-    
-    .bet-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .bet-value {
+
+    h2 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 1.4rem;
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
       font-weight: 700;
-      color: #f1c40f;
-      min-width: 60px;
-      text-align: center;
-    }
-    
-    .bet-btn {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border-radius: 6px;
-      background: var(--cell-bg);
+      letter-spacing: 0.08em;
       color: #fff;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.2s;
+      margin-bottom: 2rem;
     }
-    
-    .bet-btn:hover:not(:disabled) {
-      background: var(--border);
-      transform: scale(1.1);
+
+    .dominance-section { text-align: center; }
+
+    .chain {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 3rem 0;
     }
-    
-    .bet-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
+
+    .weapon-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
-    
-    .btn-spin:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .log {
-      margin-top: 2rem;
-      max-width: 600px;
-      max-height: 120px;
-      overflow-y: auto;
-      padding: 1rem;
-      background: var(--grid-bg);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 0.8rem;
-      color: #666;
-      line-height: 1.6;
-    }
-    
-    .log-entry {
-      padding: 0.2rem 0;
-    }
-    
-    .log-entry.kill {
-      color: var(--scissors);
-    }
-    
-    .log-entry.pack {
-      color: var(--active);
-    }
-    
-    .speed-control {
+
+    .weapon-icon {
+      width: 72px;
+      height: 72px;
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    
-    .speed-control label {
-      font-size: 0.8rem;
-      color: #666;
-    }
-    
-    .speed-control input {
-      width: 100px;
-    }
-    
-    .attempts {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    
-    .attempt-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--active);
+      justify-content: center;
+      font-size: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       transition: all 0.3s ease;
     }
-    
-    .attempt-dot.empty {
-      background: #333;
+
+    .weapon-icon:hover {
+      transform: scale(1.15);
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(241, 196, 15, 0.2);
     }
-    
-    .phase-1 {
-      color: var(--active);
-    }
-    
-    .phase-2 {
-      color: #e74c3c;
-    }
-    
-    .game-over {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-    }
-    
-    .game-over.show {
-      display: flex;
-    }
-    
-    .popup {
-      background: var(--grid-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      min-width: 320px;
-      position: relative;
-    }
-    
-    .esc-hint {
-      font-size: 0.8rem;
-      color: #555;
+
+    .weapon-name {
+      font-size: 0.75rem;
+      font-weight: 700;
       letter-spacing: 0.1em;
-      margin-top: 0.5rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
-    
-    .close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      color: #666;
-      font-size: 24px;
-      cursor: pointer;
-      border-radius: 4px;
+
+    .chain-arrow {
+      font-size: 1.2rem;
+      color: var(--scissors);
+      font-weight: 700;
+    }
+
+    .phases {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-top: 2rem;
+    }
+
+    .phase-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .phase-card:hover {
+      border-color: var(--gold-dim);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .phase-card.cannibalism { border-color: rgba(192, 57, 43, 0.3); }
+    .phase-card.cannibalism:hover {
+      border-color: var(--scissors);
+      box-shadow: 0 16px 48px var(--red-glow);
+    }
+
+    .phase-card.alpha { border-color: rgba(241, 196, 15, 0.2); }
+    .phase-card.alpha:hover {
+      border-color: var(--gold);
+      box-shadow: 0 16px 48px rgba(241, 196, 15, 0.15);
+    }
+
+    .phase-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .phase-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
+      gap: 10px;
     }
-    
-    .close-btn:hover {
-      color: #fff;
-      background: rgba(255,255,255,0.1);
+
+    .phase-card p {
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--text);
     }
-    
-    .game-over-text {
+
+    .formula-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .formula {
       font-family: 'Orbitron', sans-serif;
-      font-size: 2rem;
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      background: linear-gradient(135deg, #c0392b, #e74c3c);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
     }
-    
-    .final-stats {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+
+    .formula-desc {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      line-height: 1.8;
+      max-width: 500px;
+      margin: 0 auto;
     }
-    
-    .stat-line {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.75rem 1rem;
-      background: rgba(255, 255, 255, 0.03);
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 3rem 0;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 24px 16px;
+      text-align: center;
     }
-    
-    .stat-line.total {
-      margin-top: 0.5rem;
-      background: rgba(241, 196, 15, 0.1);
-      border: 1px solid rgba(241, 196, 15, 0.3);
-    }
-    
-    .stat-line.payout {
-      margin-top: 0.5rem;
-      background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.15));
-      border: 1px solid rgba(46, 204, 113, 0.4);
-    }
-    
-    .stat-line.payout .stat-title {
-      color: #2ecc71;
-      font-weight: 700;
-    }
-    
-    .stat-line.payout .stat-detail {
-      color: #2ecc71;
-      font-size: 1.3rem;
-    }
-    
-    .stat-line.lose {
-      background: rgba(231, 76, 60, 0.1);
-      border: 1px solid rgba(231, 76, 60, 0.3);
-    }
-    
-    .stat-line.lose .stat-title {
-      color: #e74c3c;
-    }
-    
-    .stat-line.lose .stat-detail {
-      color: #e74c3c;
-    }
-    
-    .stat-title {
-      color: #888;
-      font-size: 0.9rem;
-    }
-    
-    .stat-line.total .stat-title {
-      color: var(--active);
-      font-weight: 700;
-    }
-    
-    .stat-detail {
+
+    .stat-value {
       font-family: 'Orbitron', sans-serif;
-      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--gold);
+      display: block;
     }
-    
-    .stat-detail span {
-      color: var(--active);
-      font-weight: 700;
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 8px;
     }
-    
-    .brand-logo {
-      position: fixed;
-      bottom: 1rem;
-      left: 1rem;
-      opacity: 0.7;
-      transition: opacity 0.3s;
-      z-index: 100;
+
+    .cta-section {
+      text-align: center;
+      padding: 80px 0 120px;
     }
-    
-    .brand-logo:hover {
-      opacity: 1;
+
+    .cta-section h2 { margin-bottom: 1rem; }
+
+    .cta-desc {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
+    }
+
+    footer a {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+
+    footer a:hover { color: var(--gold); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .hero { min-height: auto; padding: 80px 0 60px; }
+      .weapons-orbit { font-size: 1.8rem; letter-spacing: 0.2em; }
+      .play-btn { padding: 16px 36px; font-size: 0.95rem; }
+      .stats-row { grid-template-columns: 1fr; }
+      .chain { gap: 8px; }
+      .weapon-icon { width: 56px; height: 56px; font-size: 1.5rem; }
+      section { padding: 60px 0; }
+      .scroll-hint { display: none; }
     }
   </style>
 </head>
 <body>
-  <!-- Uncloned Math logo -->
-  <a href="https://constrik-game.netlify.app" target="_blank" class="brand-logo" title="Uncloned Math">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48">
-      <defs>
-        <linearGradient id="logoGold" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#f1c40f"/>
-          <stop offset="100%" style="stop-color:#e67e22"/>
-        </linearGradient>
-        <linearGradient id="logoCyan" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#00d4ff"/>
-          <stop offset="100%" style="stop-color:#0099cc"/>
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" fill="rgba(10,10,26,0.8)" rx="8"/>
-      <g transform="translate(32, 32)">
-        <circle cx="0" cy="0" r="24" fill="none" stroke="url(#logoCyan)" stroke-width="2"/>
-        <circle cx="0" cy="0" r="16" fill="none" stroke="url(#logoCyan)" stroke-width="1.5" stroke-dasharray="3 2"/>
-        <circle cx="0" cy="0" r="9" fill="none" stroke="url(#logoCyan)" stroke-width="1"/>
-        <text x="0" y="-2" font-family="Times New Roman, serif" font-size="22" font-weight="bold" 
-              fill="url(#logoGold)" text-anchor="middle" dominant-baseline="central">σ</text>
-      </g>
-    </svg>
-  </a>
-  
-  <h1>Sheldon's Dream</h1>
-  <p class="subtitle">Chain Reaction • RPSLS Physics</p>
-  
-  <div class="game-container">
-    <div>
-      <div class="grid-wrapper">
-        <div class="grid" id="grid"></div>
-      </div>
-      
-      <div class="controls">
-        <div class="betting-panel">
-          <div class="balance-display">
-            <span class="balance-label">Balance</span>
-            <span class="balance-value" id="balance">€1000</span>
-          </div>
-          <div class="bet-display">
-            <span class="bet-label">Bet</span>
-            <div class="bet-controls">
-              <button class="bet-btn" id="betDown">−</button>
-              <span class="bet-value" id="betValue">€10</span>
-              <button class="bet-btn" id="betUp">+</button>
-            </div>
-          </div>
-        </div>
-        <button class="btn-spin" id="spinBtn">Hunt</button>
-        <button class="btn-info" id="infoBtn">?</button>
-      </div>
-      
-      <div class="speed-control">
-        <label>Speed:</label>
-        <input type="range" id="speed" min="100" max="1000" value="400" step="100">
-        <span id="speedVal">400ms</span>
-        <button class="btn-test" id="testBtn" style="display:none;margin-left:1rem;padding:0.5rem 1rem;font-size:0.7rem;">Test</button>
-        <input type="number" id="testCount" value="5000" min="100" max="500000" step="1000" style="display:none;margin-left:0.5rem;width:100px;padding:0.5rem;font-size:0.9rem;background:#1a4525;border:2px solid #f1c40f;border-radius:4px;color:#fff;text-align:center;">
-      </div>
-      
-      <div class="test-results" id="testResults" style="display:none;margin-top:0.5rem;padding:0.5rem;background:var(--grid-bg);border-radius:8px;font-size:0.8rem;color:#4ade80;"></div>
-      
-      <div class="game-over" id="gameOver">
-        <div class="popup">
-          <button class="close-btn" onclick="closePopup()">×</button>
-          <div class="game-over-text">GAME OVER</div>
-          <div class="final-stats">
-            <div class="stat-line">
-              <span class="stat-title">Remaining</span>
-              <span class="stat-detail"><span id="finalRemaining">0</span></span>
-            </div>
-            <div class="stat-line">
-              <span class="stat-title">Max Chain</span>
-              <span class="stat-detail"><span id="finalMaxChain">0</span></span>
-            </div>
-            <div class="stat-line total">
-              <span class="stat-title">Score</span>
-              <span class="stat-detail"><span id="finalScore">0</span></span>
-            </div>
-            <div class="stat-line payout" id="payoutLine">
-              <span class="stat-title">WIN</span>
-              <span class="stat-detail"><span id="finalPayout">0x</span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="info-popup" id="infoPopup">
-      <div class="info-content">
-        <button class="info-close" onclick="closeInfo()">×</button>
-        <h2>SHELDON'S DREAM</h2>
-        
-        <h3>🎯 Goal</h3>
-        <p>Build packs, hunt prey, maximize your Score = Remaining × MaxChain</p>
-        
-        <h3>⚔️ Weapons</h3>
-        <p>Each weapon beats 2 others:</p>
-        <p>⚔️ Sword → 🏹🗡️ | 🏹 Bow → 🗡️🛡️ | 🗡️ Dagger → 🛡️🔨</p>
-        <p>🛡️ Shield → 🔨⚔️ | 🔨 Hammer → ⚔️🏹</p>
-        
-        <h3>🐺 Phase 1: Pack Hunting</h3>
-        <p>Same symbols adjacent (4-way) form a pack. Pack hunts weaker neighbors (4-way). Hunter jumps to victim's cell, may recruit new pack members.</p>
-        
-        <h3>💀 Phase 2: Cannibalism</h3>
-        <p>When Phase 1 stalls 3 times, symbol eats its own kind (8-way) until Phase 2 stalls 3 times.</p>
-        
-        <h3>☠️ Poison (up to 3 cells)</h3>
-        <p>Glowing cells kill the hunter who eats them.</p>
-        
-        <h3>🐺 Alpha Wolf</h3>
-        <p>Appears rounds 1-3. Sweeps diagonally from edge, kills everything in path. Stops at poison.</p>
-        
-        <h3>💰 Paytable</h3>
-        <table class="info-paytable">
-          <tr><th>Score</th><th>Payout</th></tr>
-          <tr><td>250+</td><td>50x</td></tr>
-          <tr><td>200-249</td><td>17x</td></tr>
-          <tr><td>170-199</td><td>5x</td></tr>
-          <tr><td>140-169</td><td>1x</td></tr>
-          <tr><td>120-139</td><td>0.5x</td></tr>
-          <tr><td>100-119</td><td>0.2x</td></tr>
-          <tr><td>80-99</td><td>0.1x</td></tr>
-          <tr><td>0-79</td><td>0x</td></tr>
-        </table>
-        <p style="text-align:center;color:#888;font-size:0.8rem;">RTP: 96.3% | Max Win: 50x</p>
-      </div>
-    </div>
-    
-    <div class="sidebar">
-      <div class="stats">
-        <div class="stat-row">
-          <span class="stat-label">Phase</span>
-          <span class="stat-value phase-1" id="phase">Hunting</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Attempts</span>
-          <div class="attempts" id="attempts">
-            <div class="attempt-dot"></div>
-            <div class="attempt-dot"></div>
-            <div class="attempt-dot"></div>
-          </div>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Remaining</span>
-          <span class="stat-value" id="remaining">36</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Kills</span>
-          <span class="stat-value" id="kills">0</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Total Kills</span>
-          <span class="stat-value" id="totalKills">0</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Pack Size</span>
-          <span class="stat-value" id="packSize">0</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Max Chain</span>
-          <span class="stat-value" id="maxChain">0</span>
-        </div>
-      </div>
-      
-      <div class="legend">
-        <h3>BEATS →</h3>
-        <div class="legend-item">
-          <span class="legend-symbol">⚔️</span>
-          <span>Sword</span>
-          <span class="legend-beats">→ 🏹 🗡️</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-symbol">🏹</span>
-          <span>Bow</span>
-          <span class="legend-beats">→ 🗡️ 🛡️</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-symbol">🗡️</span>
-          <span>Dagger</span>
-          <span class="legend-beats">→ 🛡️ 🔨</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-symbol">🛡️</span>
-          <span>Shield</span>
-          <span class="legend-beats">→ 🔨 ⚔️</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-symbol">🔨</span>
-          <span>Hammer</span>
-          <span class="legend-beats">→ ⚔️ 🏹</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="log" id="log" style="display:none;"></div>
 
-  <script>
-    const SYMBOLS = ['⚔️', '🏹', '🗡️', '🛡️', '🔨'];
-    const NAMES = ['Sword', 'Bow', 'Dagger', 'Shield', 'Hammer'];
-    
-    // Who beats who: BEATS[attacker] = [victims]
-    const BEATS = {
-      '⚔️': ['🏹', '🗡️'],   // Sword beats Bow, Dagger
-      '🏹': ['🗡️', '🛡️'],   // Bow beats Dagger, Shield
-      '🗡️': ['🛡️', '🔨'],   // Dagger beats Shield, Hammer
-      '🛡️': ['🔨', '⚔️'],   // Shield beats Hammer, Sword
-      '🔨': ['⚔️', '🏹']    // Hammer beats Sword, Bow
-    };
-    
-    // Diagonal directions
-    const DIAGONALS = [
-      { dr: -1, dc: 1, name: '↗' },
-      { dr: 1, dc: 1, name: '↘' },
-      { dr: 1, dc: -1, name: '↙' },
-      { dr: -1, dc: -1, name: '↖' }
-    ];
-    
-    const ALPHA_CHANCE = 0.3;
-    const POISON_MIN = 0;
-    const POISON_MAX = 3;
-    
-    // Paytable: score threshold → payout multiplier (RTP 96.22%, Sigma 4.23)
-    const PAYTABLE = [
-      { min: 250, payout: 50 },
-      { min: 200, payout: 17 },
-      { min: 170, payout: 5 },
-      { min: 140, payout: 1 },
-      { min: 120, payout: 0.5 },
-      { min: 100, payout: 0.2 },
-      { min: 80, payout: 0.1 },
-      { min: 0, payout: 0 }
-    ];
-    
-    // Betting system
-    const BET_OPTIONS = [1, 2, 5, 10, 20, 50, 100];
-    let balance = 1000;
-    let currentBet = 10;
-    
-    function getPayout(score) {
-      for (const tier of PAYTABLE) {
-        if (score >= tier.min) return tier.payout;
-      }
-      return 0;
-    }
-    
-    // ========== GAME ENGINE (Pure Logic) ==========
-    const GameEngine = {
-      GRID_SIZE: 6,
-      
-      getNeighbors4(index) {
-        const row = Math.floor(index / 6);
-        const col = index % 6;
-        const neighbors = [];
-        if (row > 0) neighbors.push(index - 6);
-        if (row < 5) neighbors.push(index + 6);
-        if (col > 0) neighbors.push(index - 1);
-        if (col < 5) neighbors.push(index + 1);
-        return neighbors;
-      },
-      
-      getNeighbors8(index) {
-        const row = Math.floor(index / 6);
-        const col = index % 6;
-        const neighbors = [];
-        for (let dr = -1; dr <= 1; dr++) {
-          for (let dc = -1; dc <= 1; dc++) {
-            if (dr === 0 && dc === 0) continue;
-            const nr = row + dr;
-            const nc = col + dc;
-            if (nr >= 0 && nr < 6 && nc >= 0 && nc < 6) {
-              neighbors.push(nr * 6 + nc);
-            }
-          }
-        }
-        return neighbors;
-      },
-      
-      getNeighbors(index, phase) {
-        return phase === 1 ? this.getNeighbors4(index) : this.getNeighbors8(index);
-      },
-      
-      canEat(attacker, victim, phase) {
-        if (!attacker || !victim) return false;
-        if (phase === 1) {
-          return BEATS[attacker]?.includes(victim);
-        } else {
-          return attacker === victim;
-        }
-      },
-      
-      buildPack(grid, startIndex, phase) {
-        const hunterSymbol = grid[startIndex];
-        const packSet = new Set([startIndex]);
-        const packQueue = [startIndex];
-        
-        if (phase === 1) {
-          for (let i = 0; i < packQueue.length; i++) {
-            const idx = packQueue[i];
-            const neighbors = this.getNeighbors4(idx);
-            for (const n of neighbors) {
-              if (grid[n] === hunterSymbol && !packSet.has(n)) {
-                packSet.add(n);
-                packQueue.push(n);
-              }
-            }
-          }
-        }
-        
-        return { packSet, packQueue, hunterSymbol };
-      },
-      
-      findVictims(grid, hunterIdx, hunterSymbol, packSet, phase) {
-        const neighbors = this.getNeighbors(hunterIdx, phase);
-        return neighbors.filter(n => {
-          if (grid[n] === null) return false;
-          if (phase === 1) {
-            return this.canEat(hunterSymbol, grid[n], phase);
-          } else {
-            return grid[n] === hunterSymbol && !packSet.has(n);
-          }
-        });
-      },
-      
-      // Симуляция одной охоты, возвращает события
-      simulateHunt(grid, poison, phase, rng = Math.random) {
-        const events = [];
-        const nonEmpty = grid.map((s, i) => s !== null ? i : -1).filter(i => i >= 0);
-        
-        if (nonEmpty.length === 0) {
-          return { events: [{type: 'empty'}], kills: 0, maxChain: 0 };
-        }
-        
-        const startIndex = nonEmpty[Math.floor(rng() * nonEmpty.length)];
-        const { packSet, packQueue, hunterSymbol } = this.buildPack(grid, startIndex, phase);
-        
-        events.push({type: 'packFormed', packSet: new Set(packSet), startIndex, hunterSymbol});
-        
-        let kills = 0;
-        let currentChain = 0;
-        let maxChain = 0;
-        
-        while (packQueue.length > 0) {
-          const hunterIdx = packQueue.shift();
-          if (grid[hunterIdx] === null) continue;
-          
-          events.push({type: 'hunterActive', hunterIdx});
-          
-          const victims = this.findVictims(grid, hunterIdx, hunterSymbol, packSet, phase);
-          
-          if (victims.length > 0) {
-            const victimIdx = victims[Math.floor(rng() * victims.length)];
-            const victimSymbol = grid[victimIdx];
-            const isPoisoned = poison.has(victimIdx);
-            
-            events.push({type: 'kill', hunterIdx, victimIdx, victimSymbol, isPoisoned, phase});
-            
-            // Apply kill
-            grid[victimIdx] = null;
-            poison.delete(victimIdx);
-            kills++;
-            
-            if (phase === 1) {
-              currentChain++;
-              if (currentChain > maxChain) maxChain = currentChain;
-            }
-            
-            if (isPoisoned) {
-              grid[hunterIdx] = null;
-              packSet.delete(hunterIdx);
-              currentChain = 0;
-              events.push({type: 'poisoned', hunterIdx});
-              continue;
-            }
-            
-            // Move hunter
-            grid[hunterIdx] = null;
-            grid[victimIdx] = hunterSymbol;
-            packSet.delete(hunterIdx);
-            packSet.add(victimIdx);
-            
-            events.push({type: 'move', from: hunterIdx, to: victimIdx});
-            
-            // New pack members join (phase 1)
-            if (phase === 1) {
-              const newNeighbors = this.getNeighbors4(victimIdx);
-              for (const n of newNeighbors) {
-                if (grid[n] === hunterSymbol && !packSet.has(n)) {
-                  packSet.add(n);
-                  packQueue.push(n);
-                  events.push({type: 'joined', idx: n});
-                }
-              }
-            }
-            
-            packQueue.push(victimIdx);
-          }
-        }
-        
-        return { events, kills, maxChain };
-      },
-      
-      // Симуляция Alpha Wolf
-      simulateAlpha(grid, poison, rng = Math.random) {
-        // DIAGS: 0=↗[-1,1], 1=↘[1,1], 2=↙[1,-1], 3=↖[-1,-1]
-        const DIAGS = [[-1,1],[1,1],[1,-1],[-1,-1]];
-        const edges = [];
-        for (let i = 0; i < 6; i++) {
-          edges.push([0, i], [5, i], [i, 0], [i, 5]);
-        }
-        const [startR, startC] = edges[Math.floor(rng() * edges.length)];
-        
-        // Direction must go INTO the grid
-        let validDirs = [];
-        if (startR === 0 && startC === 0) {
-          validDirs = [DIAGS[1]]; // ↘
-        } else if (startR === 0 && startC === 5) {
-          validDirs = [DIAGS[2]]; // ↙
-        } else if (startR === 5 && startC === 0) {
-          validDirs = [DIAGS[0]]; // ↗
-        } else if (startR === 5 && startC === 5) {
-          validDirs = [DIAGS[3]]; // ↖
-        } else if (startR === 0) {
-          validDirs = [DIAGS[1], DIAGS[2]]; // ↘ or ↙
-        } else if (startR === 5) {
-          validDirs = [DIAGS[0], DIAGS[3]]; // ↗ or ↖
-        } else if (startC === 0) {
-          validDirs = [DIAGS[0], DIAGS[1]]; // ↗ or ↘
-        } else if (startC === 5) {
-          validDirs = [DIAGS[2], DIAGS[3]]; // ↖ or ↙
-        }
-        
-        const dir = validDirs[Math.floor(rng() * validDirs.length)];
-        
-        const events = [{type: 'alphaStart', startR, startC, dir}];
-        let r = startR, c = startC, kills = 0;
-        
-        while (r >= 0 && r < 6 && c >= 0 && c < 6) {
-          const idx = r * 6 + c;
-          if (grid[idx] !== null) {
-            const isPoisoned = poison.has(idx);
-            events.push({type: 'alphaKill', idx, symbol: grid[idx], isPoisoned});
-            grid[idx] = null;
-            poison.delete(idx);
-            kills++;
-            if (isPoisoned) break;
-          }
-          r += dir[0];
-          c += dir[1];
-        }
-        
-        return { events, kills };
-      },
-      
-      // Полная симуляция игры (для теста)
-      simulateFullGame(rng = Math.random) {
-        // Init grid
-        const grid = [];
-        const poison = new Set();
-        for (let i = 0; i < 36; i++) {
-          grid.push(SYMBOLS[Math.floor(rng() * SYMBOLS.length)]);
-        }
-        const numPoison = Math.floor(rng() * 4);
-        while (poison.size < numPoison) {
-          poison.add(Math.floor(rng() * 36));
-        }
-        
-        let attempts = 3;
-        let phase = 1;
-        let maxChainGame = 0;
-        const hasAlpha = rng() < ALPHA_CHANCE;
-        const alphaRound = hasAlpha ? Math.floor(rng() * 3) + 1 : -1;
-        let roundCount = 0;
-        let alphaUsed = false;
-        
-        while (true) {
-          roundCount++;
-          
-          // Alpha
-          if (phase === 1 && !alphaUsed && roundCount === alphaRound) {
-            alphaUsed = true;
-            this.simulateAlpha(grid, poison, rng);
-          }
-          
-          const result = this.simulateHunt(grid, poison, phase, rng);
-          
-          if (result.events[0]?.type === 'empty') break;
-          
-          if (result.maxChain > maxChainGame) maxChainGame = result.maxChain;
-          
-          if (result.kills > 0) {
-            attempts = 3;
-          } else {
-            attempts--;
-          }
-          
-          if (attempts <= 0) {
-            if (phase === 1) {
-              phase = 2;
-              attempts = 3;
-            } else {
-              break;
-            }
-          }
-        }
-        
-        const remaining = grid.filter(s => s !== null).length;
-        const score = remaining * maxChainGame;
-        const payout = getPayout(score);
-        
-        return { remaining, maxChain: maxChainGame, score, payout };
-      }
-    };
-    // ========== END GAME ENGINE ==========
-    
-    let grid = [];
-    let poison = new Set();
-    let isRunning = false;
-    let speed = 400;
-    let attempts = 3;
-    let totalKillsGame = 0;
-    let phase = 1;
-    let phase1Remaining = 0;
-    let alphaUsed = false;
-    let alphaRound = -1;
-    let currentChain = 0;
-    let maxChainGame = 0;
-    
-    const gridEl = document.getElementById('grid');
-    const logEl = document.getElementById('log');
-    const speedSlider = document.getElementById('speed');
-    const speedVal = document.getElementById('speedVal');
-    const gameOverEl = document.getElementById('gameOver');
-    
-    speedSlider.addEventListener('input', () => {
-      speed = parseInt(speedSlider.value);
-      speedVal.textContent = speed + 'ms';
-    });
-    
-    // Betting controls
-    const balanceEl = document.getElementById('balance');
-    const betValueEl = document.getElementById('betValue');
-    const betUpBtn = document.getElementById('betUp');
-    const betDownBtn = document.getElementById('betDown');
-    const spinBtn = document.getElementById('spinBtn');
-    
-    function updateBettingUI() {
-      balanceEl.textContent = '€' + balance;
-      betValueEl.textContent = '€' + currentBet;
-      
-      const currentIdx = BET_OPTIONS.indexOf(currentBet);
-      betDownBtn.disabled = currentIdx <= 0;
-      betUpBtn.disabled = currentIdx >= BET_OPTIONS.length - 1 || BET_OPTIONS[currentIdx + 1] > balance;
-      
-      // Hunt disabled if no balance or running
-      spinBtn.disabled = isRunning || balance < currentBet;
-    }
-    
-    betUpBtn.addEventListener('click', () => {
-      const currentIdx = BET_OPTIONS.indexOf(currentBet);
-      if (currentIdx < BET_OPTIONS.length - 1) {
-        const newBet = BET_OPTIONS[currentIdx + 1];
-        if (newBet <= balance) {
-          currentBet = newBet;
-          updateBettingUI();
-        }
-      }
-    });
-    
-    betDownBtn.addEventListener('click', () => {
-      const currentIdx = BET_OPTIONS.indexOf(currentBet);
-      if (currentIdx > 0) {
-        currentBet = BET_OPTIONS[currentIdx - 1];
-        updateBettingUI();
-      }
-    });
-    
-    function initGrid() {
-      grid = [];
-      poison = new Set();
-      
-      for (let i = 0; i < 36; i++) {
-        grid.push(SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]);
-      }
-      
-      // Add 0-3 poison cells
-      const numPoison = Math.floor(Math.random() * (POISON_MAX - POISON_MIN + 1)) + POISON_MIN;
-      while (poison.size < numPoison) {
-        poison.add(Math.floor(Math.random() * 36));
-      }
-      
-      renderGrid();
-    }
-    
-    function newGame() {
-      attempts = 3;
-      totalKillsGame = 0;
-      phase = 1;
-      phase1Remaining = 0;
-      alphaUsed = false;
-      // Alpha: 30% chance, trigger on round 1-3
-      const roll = Math.random();
-      alphaRound = roll < ALPHA_CHANCE ? Math.floor(Math.random() * 3) + 1 : -1;
-      currentChain = 0;
-      maxChainGame = 0;
-      document.body.className = '';
-      gameOverEl.classList.remove('show');
-      initGrid();
-      updateAttempts();
-      updateStats(0, 0);
-      updatePhase();
-      logEl.innerHTML = '';
-      const btn = document.getElementById('spinBtn');
-      btn.textContent = 'Hunt';
-      btn.onclick = () => {
-        if (balance >= currentBet) spin();
-      };
-      btn.style.display = 'block';
-      updateBettingUI();
-    }
-    
-    function updateAttempts() {
-      const dots = document.querySelectorAll('.attempt-dot');
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('empty', i >= attempts);
-      });
-    }
-    
-    function updatePhase() {
-      const phaseEl = document.getElementById('phase');
-      phaseEl.textContent = phase === 1 ? 'Hunting' : 'Cannibalism';
-      phaseEl.className = 'stat-value phase-' + phase;
-      document.body.className = phase === 1 ? '' : 'phase-cannibalism';
-    }
-    
-    function countRemaining() {
-      return grid.filter(s => s !== null).length;
-    }
-    
-    function renderGrid() {
-      gridEl.innerHTML = '';
-      for (let i = 0; i < 36; i++) {
-        const cell = document.createElement('div');
-        const isEmpty = grid[i] === null;
-        const isPoisoned = poison.has(i) && !isEmpty;
-        cell.className = 'cell' + (isEmpty ? ' empty' : '') + (isPoisoned ? ' poison' : '');
-        cell.textContent = grid[i] || '';
-        cell.dataset.index = i;
-        gridEl.appendChild(cell);
-      }
-      document.getElementById('remaining').textContent = countRemaining();
-    }
-    
-    function updateCell(index) {
-      const cell = getCell(index);
-      if (!cell) return;
-      const isEmpty = grid[index] === null;
-      const isPoisoned = poison.has(index) && !isEmpty;
-      // Preserve pack/active classes
-      const wasPack = cell.classList.contains('pack');
-      const wasActive = cell.classList.contains('active');
-      cell.className = 'cell' + (isEmpty ? ' empty' : '') + (isPoisoned ? ' poison' : '');
-      if (wasPack && !isEmpty) cell.classList.add('pack');
-      if (wasActive && !isEmpty) cell.classList.add('active');
-      cell.textContent = grid[index] || '';
-      document.getElementById('remaining').textContent = countRemaining();
-    }
-    
-    function getCell(index) {
-      return gridEl.children[index];
-    }
-    
-    // Use GameEngine for core logic
-    const getNeighbors4 = (index) => GameEngine.getNeighbors4(index);
-    const getNeighbors8 = (index) => GameEngine.getNeighbors8(index);
-    const getNeighbors = (index) => GameEngine.getNeighbors(index, phase);
-    const canEat = (attacker, victim) => GameEngine.canEat(attacker, victim, phase);
-    
-    const debugMode = new URLSearchParams(window.location.search).get('debug') === '17';
-    
-    function log(msg, type = '') {
-      if (!debugMode) return;
-      const entry = document.createElement('div');
-      entry.className = 'log-entry ' + type;
-      entry.textContent = msg;
-      logEl.appendChild(entry);
-      logEl.scrollTop = logEl.scrollHeight;
-    }
-    
-    function updateStats(packSize, kills) {
-      document.getElementById('packSize').textContent = packSize;
-      document.getElementById('kills').textContent = kills;
-      document.getElementById('totalKills').textContent = totalKillsGame;
-      document.getElementById('remaining').textContent = countRemaining();
-      document.getElementById('maxChain').textContent = maxChainGame;
-    }
-    
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    async function doAlpha() {
-      // Start from edge cell
-      const edges = [];
-      for (let i = 0; i < 6; i++) {
-        edges.push([0, i], [5, i], [i, 0], [i, 5]);
-      }
-      const [startRow, startCol] = edges[Math.floor(Math.random() * edges.length)];
-      
-      // Direction must go INTO the grid
-      let validDirs = [];
-      if (startRow === 0 && startCol === 0) {
-        validDirs = [DIAGONALS[1]]; // ↘
-      } else if (startRow === 0 && startCol === 5) {
-        validDirs = [DIAGONALS[2]]; // ↙
-      } else if (startRow === 5 && startCol === 0) {
-        validDirs = [DIAGONALS[0]]; // ↗
-      } else if (startRow === 5 && startCol === 5) {
-        validDirs = [DIAGONALS[3]]; // ↖
-      } else if (startRow === 0) {
-        validDirs = [DIAGONALS[1], DIAGONALS[2]]; // ↘ or ↙
-      } else if (startRow === 5) {
-        validDirs = [DIAGONALS[0], DIAGONALS[3]]; // ↗ or ↖
-      } else if (startCol === 0) {
-        validDirs = [DIAGONALS[0], DIAGONALS[1]]; // ↗ or ↘
-      } else if (startCol === 5) {
-        validDirs = [DIAGONALS[2], DIAGONALS[3]]; // ↙ or ↖
-      }
-      
-      const dir = validDirs[Math.floor(Math.random() * validDirs.length)];
-      
-      // BIG FLASH for Alpha announcement
-      document.body.classList.add('alpha-flash');
-      log(`💀 ALPHA INCOMING! ${dir.name}`, 'alpha');
-      await sleep(500);
-      document.body.classList.remove('alpha-flash');
-      
-      let kills = 0;
-      
-      // Collect all cells in path first
-      const path = [];
-      let r = startRow, c = startCol;
-      while (r >= 0 && r < 6 && c >= 0 && c < 6) {
-        const idx = r * 6 + c;
-        if (grid[idx] !== null) {
-          path.push(idx);
-          if (poison.has(idx)) break; // Stop at poison
-        }
-        r += dir.dr;
-        c += dir.dc;
-      }
-      
-      // Now animate each cell in path
-      for (let i = 0; i < path.length; i++) {
-        const idx = path[i];
-        const cell = getCell(idx);
-        const symbol = grid[idx];
-        const isPoisoned = poison.has(idx);
-        
-        // Show skull + victim blend
-        const blendContainer = document.createElement('div');
-        blendContainer.className = 'blend-container';
-        blendContainer.innerHTML = `
-          <span class="blend-victim">${symbol}</span>
-          <span class="blend-hunter">💀</span>
-        `;
-        cell.textContent = '';
-        cell.appendChild(blendContainer);
-        cell.classList.add('blending', 'alpha-blend');
-        
-        await sleep(700);
-        
-        if (isPoisoned) {
-          log(`💀 → ☠️ ${symbol} (poisoned!)`, 'kill');
-          cell.classList.remove('blending', 'alpha-blend');
-          cell.classList.add('dissolve');
-          await sleep(700);
-          grid[idx] = null;
-          poison.delete(idx);
-          kills++;
-          totalKillsGame++;
-          renderGrid();
-          log(`💀 died from poison!`, 'alpha');
-          return kills;
-        }
-        
-        // Victim dissolves
-        log(`💀 → ${symbol}`, 'kill');
-        cell.querySelector('.blend-victim').classList.add('fade-out');
-        await sleep(500);
-        
-        cell.classList.remove('blending', 'alpha-blend');
-        grid[idx] = null;
-        kills++;
-        totalKillsGame++;
-        
-        // Don't renderGrid until done - just update cell visually
-        cell.textContent = '';
-        cell.classList.add('empty');
-      }
-      
-      renderGrid();
-      return kills;
-    }
-    
-    async function doOneHunt() {
-      // Reset chain for new hunt
-      if (phase === 1) currentChain = 0;
-      
-      const nonEmpty = grid.map((s, i) => s !== null ? i : -1).filter(i => i >= 0);
-      if (nonEmpty.length === 0) {
-        log('Grid is empty!');
-        return -1;
-      }
-      
-      const startIndex = nonEmpty[Math.floor(Math.random() * nonEmpty.length)];
-      const hunterSymbol = grid[startIndex];
-      
-      const phaseName = phase === 1 ? 'Hunt' : 'Cannibal';
-      log(`${hunterSymbol} ${phaseName}`, 'pack');
-      
-      let packQueue = [];
-      let packSet = new Set();
-      
-      if (phase === 1) {
-        // Phase 1: gather pack (connected same symbols)
-        const toCheck = [startIndex];
-        while (toCheck.length > 0) {
-          const idx = toCheck.shift();
-          if (packSet.has(idx)) continue;
-          if (grid[idx] !== hunterSymbol) continue;
-          
-          packSet.add(idx);
-          packQueue.push(idx);
-          
-          for (const n of getNeighbors4(idx)) {
-            if (!packSet.has(n) && grid[n] === hunterSymbol) {
-              toCheck.push(n);
-            }
-          }
-        }
-        if (packQueue.length > 1) {
-          log(`Pack: ${packQueue.length}`, 'pack');
-        }
-      } else {
-        // Phase 2: lone cannibal, no pack
-        packSet.add(startIndex);
-        packQueue.push(startIndex);
-      }
-      
-      packSet.forEach(idx => getCell(idx).classList.add('pack'));
-      getCell(startIndex).classList.add('active');
-      await sleep(speed);
-      
-      let huntKills = 0;
-      
-      while (packQueue.length > 0) {
-        const hunterIdx = packQueue.shift();
-        
-        if (grid[hunterIdx] !== hunterSymbol) continue;
-        
-        packSet.forEach(idx => getCell(idx).classList.remove('active'));
-        getCell(hunterIdx).classList.add('active');
-        
-        const neighbors = getNeighbors(hunterIdx);
-        const victims = neighbors.filter(n => {
-          if (phase === 1) {
-            return canEat(hunterSymbol, grid[n]);
-          } else {
-            // Phase 2: can eat same symbol but NOT from own pack
-            return grid[n] === hunterSymbol && !packSet.has(n);
-          }
-        });
-        
-        if (victims.length > 0) {
-          const victimIdx = victims[Math.floor(Math.random() * victims.length)];
-          const victimSymbol = grid[victimIdx];
-          const victimIsPoisoned = poison.has(victimIdx);
-          
-          const action = phase === 1 ? '→' : '💀';
-          const poisonMark = victimIsPoisoned ? ' ☠️' : '';
-          log(`${hunterSymbol} ${action} ${victimSymbol}${poisonMark}`, 'kill');
-          
-          if (phase === 1) {
-            // Phase 1: hunter jumps, blend (both visible), victim dissolves
-            const hunterCell = getCell(hunterIdx);
-            const victimCell = getCell(victimIdx);
-            
-            // Calculate positions
-            const hunterRect = hunterCell.getBoundingClientRect();
-            const victimRect = victimCell.getBoundingClientRect();
-            
-            // Create flying hunter clone
-            const flyingHunter = document.createElement('div');
-            flyingHunter.className = 'cell flying-hunter';
-            flyingHunter.textContent = hunterSymbol;
-            flyingHunter.style.cssText = `
-              position: fixed;
-              left: ${hunterRect.left}px;
-              top: ${hunterRect.top}px;
-              width: ${hunterRect.width}px;
-              height: ${hunterRect.height}px;
-              z-index: 100;
-              transition: all 0.3s ease-out;
-            `;
-            document.body.appendChild(flyingHunter);
-            
-            // Hide original hunter cell
-            hunterCell.style.opacity = '0';
-            
-            // Fly to victim
-            await sleep(50);
-            flyingHunter.style.left = `${victimRect.left}px`;
-            flyingHunter.style.top = `${victimRect.top}px`;
-            await sleep(350);
-            
-            // BLEND: show both symbols together
-            // Put hunter symbol inside victim cell too
-            const blendContainer = document.createElement('div');
-            blendContainer.className = 'blend-container';
-            blendContainer.innerHTML = `
-              <span class="blend-victim">${victimSymbol}</span>
-              <span class="blend-hunter">${hunterSymbol}</span>
-            `;
-            victimCell.textContent = '';
-            victimCell.appendChild(blendContainer);
-            flyingHunter.remove();
-            
-            // Pulse blend
-            victimCell.classList.add('blending');
-            await sleep(800);
-            
-            if (victimIsPoisoned) {
-              // Both dissolve
-              victimCell.classList.remove('blending');
-              victimCell.classList.add('dissolve');
-              await sleep(700);
-              
-              grid[victimIdx] = null;
-              poison.delete(victimIdx);
-              huntKills++;
-              totalKillsGame++;
-              if (phase === 1) {
-                currentChain++;
-                if (currentChain > maxChainGame) maxChainGame = currentChain;
-                currentChain = 0; // Chain broken by poison
-              }
-              
-              log(`${hunterSymbol} poisoned!`, 'kill');
-              grid[hunterIdx] = null;
-              packSet.delete(hunterIdx);
-              updateCell(victimIdx);
-              updateCell(hunterIdx);
-              updateStats(packSet.size, huntKills);
-              await sleep(200);
-              continue;
-            }
-            
-            // Victim fades, hunter stays
-            victimCell.querySelector('.blend-victim').classList.add('fade-out');
-            await sleep(500);
-            
-            // Clean up - show only hunter
-            victimCell.classList.remove('blending');
-            victimCell.textContent = hunterSymbol;
-          } else {
-            // Phase 2: old animation
-            getCell(hunterIdx).classList.add('hunting');
-            getCell(victimIdx).classList.add('eaten');
-            await sleep(speed);
-            
-            if (victimIsPoisoned) {
-              grid[victimIdx] = null;
-              poison.delete(victimIdx);
-              huntKills++;
-              totalKillsGame++;
-              
-              log(`${hunterSymbol} poisoned!`, 'kill');
-              grid[hunterIdx] = null;
-              packSet.delete(hunterIdx);
-              updateCell(victimIdx);
-              updateCell(hunterIdx);
-              updateStats(packSet.size, huntKills);
-              await sleep(speed / 2);
-              continue;
-            }
-          }
-          
-          // Kill the victim
-          grid[victimIdx] = null;
-          if (victimIsPoisoned) {
-            poison.delete(victimIdx);
-          }
-          huntKills++;
-          totalKillsGame++;
-          if (phase === 1) {
-            currentChain++;
-            if (currentChain > maxChainGame) maxChainGame = currentChain;
-          }
-          
-          // Move hunter to victim position
-          grid[hunterIdx] = null;
-          grid[victimIdx] = hunterSymbol;
-          
-          updateCell(hunterIdx);
-          updateCell(victimIdx);
-          
-          packSet.delete(hunterIdx);
-          packSet.add(victimIdx);
-          
-          // Sync pack highlighting
-          for (let i = 0; i < 36; i++) {
-            const cell = getCell(i);
-            cell.classList.remove('pack', 'active');
-          }
-          packSet.forEach(idx => {
-            if (grid[idx] === hunterSymbol) {
-              getCell(idx).classList.add('pack');
-            }
-          });
-          getCell(victimIdx).classList.add('active');
-          
-          if (phase === 1) {
-            // Phase 1: new pack members can join
-            const newNeighbors = getNeighbors4(victimIdx);
-            for (const n of newNeighbors) {
-              if (grid[n] === hunterSymbol && !packSet.has(n)) {
-                packSet.add(n);
-                packQueue.push(n);
-                getCell(n).classList.add('pack');
-                log(`+1 joined!`, 'pack');
-              }
-            }
-          }
-          
-          packQueue.push(victimIdx);
-          
-          updateStats(packSet.size, huntKills);
-          await sleep(speed / 2);
-        }
-      }
-      
-      for (let i = 0; i < 36; i++) {
-        getCell(i).classList.remove('active', 'pack', 'hunting');
-      }
-      
-      return huntKills;
-    }
-    
-    async function spin() {
-      if (isRunning) return;
-      if (balance < currentBet) return;
-      
-      // Deduct bet
-      balance -= currentBet;
-      updateBettingUI();
-      
-      isRunning = true;
-      document.getElementById('spinBtn').style.display = 'none';
-      
-      log('=== Phase 1: Hunt ===', 'pack');
-      
-      let roundCount = 0;
-      
-      // Main game loop
-      while (true) {
-        roundCount++;
-        
-        // Alpha triggers on its designated round
-        if (phase === 1 && !alphaUsed && roundCount === alphaRound) {
-          alphaUsed = true;
-          log(`💀 Alpha triggered!`, 'alpha');
-          const alphaKills = await doAlpha();
-          if (alphaKills > 0) {
-            log(`Alpha: +${alphaKills}!`, 'alpha');
-            updateStats(0, 0);
-          }
-          await sleep(speed);
-        }
-        
-        const kills = await doOneHunt();
-        
-        if (kills === -1) {
-          // Grid empty
-          if (phase === 1) {
-            phase1Remaining = 0;
-          }
-          break;
-        }
-        
-        if (kills > 0) {
-          attempts = 3;
-          log(`+${kills}! Attempts reset.`, 'pack');
-        } else {
-          attempts--;
-          log(`Miss. Attempts: ${attempts}`);
-        }
-        
-        updateAttempts();
-        updateStats(0, kills);
-        
-        if (attempts <= 0) {
-          if (phase === 1) {
-            // Save phase 1 remaining before transition
-            phase1Remaining = countRemaining();
-            // Transition to phase 2
-            phase = 2;
-            attempts = 3;
-            updatePhase();
-            updateAttempts();
-            log('', '');
-            log('=== Phase 2: Cannibalism ===', 'kill');
-            await sleep(speed);
-          } else {
-            // Phase 2 ended
-            break;
-          }
-        }
-        
-        await sleep(speed);
-      }
-      
-      // Game Over
-      await sleep(300);
-      const finalRemaining = countRemaining();
-      const finalScore = finalRemaining * maxChainGame;
-      const payout = getPayout(finalScore);
-      const winAmount = Math.round(payout * currentBet * 100) / 100;
-      
-      // Add winnings to balance
-      balance += winAmount;
-      updateBettingUI();
-      
-      log(`GAME OVER! Score: ${finalScore} → ${payout}x = €${winAmount}`, 'kill');
-      
-      document.getElementById('finalRemaining').textContent = finalRemaining;
-      document.getElementById('finalMaxChain').textContent = maxChainGame;
-      document.getElementById('finalScore').textContent = finalScore;
-      document.getElementById('finalPayout').textContent = winAmount > 0 ? '€' + winAmount : '€0';
-      gameOverEl.classList.add('show');
-      
-      isRunning = false;
-      updateBettingUI();
-    }
-    
-    function closePopup() {
-      gameOverEl.classList.remove('show');
-      // Показываем кнопку Hunt для новой игры
-      const btn = document.getElementById('spinBtn');
-      btn.style.display = 'block';
-      btn.textContent = 'Hunt';
-      updateBettingUI();
-      btn.onclick = () => {
-        if (balance >= currentBet) {
-          newGame();
-          spin();
-        }
-      };
-    }
-    
-    function closeInfo() {
-      document.getElementById('infoPopup').classList.remove('show');
-    }
-    
-    document.getElementById('infoBtn').addEventListener('click', () => {
-      document.getElementById('infoPopup').classList.add('show');
-    });
-    
-    document.getElementById('infoPopup').addEventListener('click', (e) => {
-      if (e.target.id === 'infoPopup') closeInfo();
-    });
-    
-    // ESC to close popups
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (gameOverEl.classList.contains('show')) closePopup();
-        if (document.getElementById('infoPopup').classList.contains('show')) closeInfo();
-      }
-    });
-    
-    // Init
-    newGame();
-    updateBettingUI();
-    
-    // Debug mode: ?debug=17 shows test button and log
-    if (debugMode) {
-      document.getElementById('testBtn').style.display = 'inline-block';
-      document.getElementById('testCount').style.display = 'inline-block';
-      document.getElementById('log').style.display = 'block';
-    }
-    
-    // ========== TEST MODE (uses GameEngine) ==========
-    function runOneGame() {
-      return GameEngine.simulateFullGame();
-    }
-    
-    document.getElementById('testBtn').addEventListener('click', async function() {
-      const btn = this;
-      const N = parseInt(document.getElementById('testCount').value) || 5000;
-      
-      btn.disabled = true;
-      btn.textContent = 'Testing...';
-      
-      const resultsEl = document.getElementById('testResults');
-      resultsEl.style.display = 'block';
-      resultsEl.textContent = `Running ${N.toLocaleString()} games...`;
-      
-      await new Promise(r => setTimeout(r, 50));
-      
-      let totalPayout = 0;
-      let totalScore = 0;
-      let sumSqPayout = 0;
-      let maxPayout = 0;
-      let hitCount = 0;
-      let anyWinCount = 0;
-      let zeroCount = 0;
-      
-      // Score distribution buckets
-      const scoreBuckets = {};
-      const payoutBuckets = {};
-      
-      const chunkSize = 1000;
-      for (let i = 0; i < N; i++) {
-        const result = runOneGame();
-        const p = result.payout;
-        const s = result.score;
-        
-        totalPayout += p;
-        totalScore += s;
-        sumSqPayout += p * p;
-        if (p > maxPayout) maxPayout = p;
-        if (p >= 1) hitCount++;
-        if (p > 0) anyWinCount++;
-        if (p === 0) zeroCount++;
-        
-        // Track distributions
-        const scoreBucket = Math.floor(s / 10) * 10;
-        scoreBuckets[scoreBucket] = (scoreBuckets[scoreBucket] || 0) + 1;
-        payoutBuckets[p] = (payoutBuckets[p] || 0) + 1;
-        
-        if (i > 0 && i % chunkSize === 0) {
-          resultsEl.textContent = `Running... ${((i/N)*100).toFixed(0)}%`;
-          await new Promise(r => setTimeout(r, 0));
-        }
-      }
-      
-      const avgPayout = totalPayout / N;
-      const rtp = avgPayout * 100;
-      const variance = (sumSqPayout / N) - (avgPayout * avgPayout);
-      const sigma = Math.sqrt(variance);
-      const avgScore = totalScore / N;
-      const hitRate = (hitCount / N) * 100;
-      const anyWin = (anyWinCount / N) * 100;
-      
-      // Generate report
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      let report = `SHELDON'S DREAM - Simulation Report\n`;
-      report += `${'='.repeat(50)}\n`;
-      report += `Date: ${new Date().toLocaleString()}\n`;
-      report += `Games: ${N.toLocaleString()}\n\n`;
-      
-      report += `SUMMARY\n${'-'.repeat(30)}\n`;
-      report += `RTP: ${rtp.toFixed(2)}%\n`;
-      report += `Sigma: ${sigma.toFixed(2)}\n`;
-      report += `Avg Score: ${avgScore.toFixed(1)}\n`;
-      report += `Max Payout: ${maxPayout}x\n`;
-      report += `Hit Rate (>=1x): ${hitRate.toFixed(2)}% (1/${Math.round(N/hitCount)})\n`;
-      report += `Any Win (>0): ${anyWin.toFixed(2)}% (1/${Math.round(N/anyWinCount)})\n`;
-      report += `Zero Games: ${zeroCount} (${(zeroCount/N*100).toFixed(2)}%)\n\n`;
-      
-      report += `PAYTABLE\n${'-'.repeat(30)}\n`;
-      PAYTABLE.forEach(t => {
-        report += `Score >= ${t.min}: ${t.payout}x\n`;
-      });
-      report += `\n`;
-      
-      report += `SCORE DISTRIBUTION\n${'-'.repeat(30)}\n`;
-      Object.keys(scoreBuckets).sort((a,b) => b-a).forEach(bucket => {
-        const count = scoreBuckets[bucket];
-        const pct = (count / N * 100).toFixed(2);
-        report += `${bucket}-${parseInt(bucket)+9}: ${count} (${pct}%)\n`;
-      });
-      report += `\n`;
-      
-      report += `PAYOUT DISTRIBUTION\n${'-'.repeat(30)}\n`;
-      Object.keys(payoutBuckets).sort((a,b) => b-a).forEach(payout => {
-        const count = payoutBuckets[payout];
-        const pct = (count / N * 100).toFixed(2);
-        const rtpContrib = (payout * count / N * 100).toFixed(2);
-        report += `${payout}x: ${count} (${pct}%) → RTP ${rtpContrib}%\n`;
-      });
-      
-      // Create download link
-      const blob = new Blob([report], {type: 'text/plain'});
-      const url = URL.createObjectURL(blob);
-      
-      resultsEl.innerHTML = `
-        <b>Test Results (${N.toLocaleString()} games):</b><br>
-        RTP: <b>${rtp.toFixed(2)}%</b> | Sigma: <b>${sigma.toFixed(2)}</b><br>
-        Avg Score: ${avgScore.toFixed(1)} | Hit≥1x: ${hitRate.toFixed(1)}% | Any Win: ${anyWin.toFixed(1)}%<br>
-        <small>Max payout: ${maxPayout.toFixed(1)}x | Zero games: ${zeroCount}</small><br>
-        <a href="${url}" download="pack-hunt-report-${N}-${timestamp}.txt" style="color:#f1c40f;">📥 Download Report</a>
-      `;
-      
-      btn.disabled = false;
-      btn.textContent = 'Test';
-    });
-  </script>
+  <div class="container">
+
+    <section class="hero">
+      <div class="weapons-orbit">
+        <span>⚔️</span><span>🏹</span><span>🗡️</span><span>🛡️</span><span>🔨</span>
+      </div>
+
+      <h1>Sheldon's Dream</h1>
+      <div class="subtitle">Pack Dominance Slot Machine</div>
+
+      <p class="hero-desc">
+        Five weapons. A 6×6 battlefield. Packs form, <strong>hunt the weak</strong>, 
+        then turn on their own. The alpha wolf sweeps the board. 
+        <strong>Score = Remaining × MaxChain.</strong>
+      </p>
+
+      <a href="sheldons-dream-game.html" class="play-btn">
+        ▶ Play Demo
+      </a>
+
+      <div class="scroll-hint">
+        <span>How it works</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </section>
+
+    <section class="dominance-section">
+      <div class="section-label">Core Mechanic</div>
+      <h2>5-Way Weapon Dominance</h2>
+
+      <div class="chain">
+        <div class="weapon-node">
+          <div class="weapon-icon">⚔️</div>
+          <span class="weapon-name">Sword</span>
+        </div>
+        <span class="chain-arrow">→</span>
+        <div class="weapon-node">
+          <div class="weapon-icon">🏹</div>
+          <span class="weapon-name">Bow</span>
+        </div>
+        <span class="chain-arrow">→</span>
+        <div class="weapon-node">
+          <div class="weapon-icon">🗡️</div>
+          <span class="weapon-name">Dagger</span>
+        </div>
+        <span class="chain-arrow">→</span>
+        <div class="weapon-node">
+          <div class="weapon-icon">🛡️</div>
+          <span class="weapon-name">Shield</span>
+        </div>
+        <span class="chain-arrow">→</span>
+        <div class="weapon-node">
+          <div class="weapon-icon">🔨</div>
+          <span class="weapon-name">Hammer</span>
+        </div>
+      </div>
+
+      <p style="font-size: 1.05rem; font-weight: 300; color: var(--text-muted); max-width: 480px; margin: 0 auto; line-height: 1.8;">
+        Each weapon beats two others in a pentagonal cycle. 
+        Sword beats Bow & Dagger. Bow beats Dagger & Shield. 
+        No weapon is strongest — position is everything.
+      </p>
+    </section>
+
+    <section>
+      <div class="section-label">Game Flow</div>
+      <h2>Three Phases of Chaos</h2>
+
+      <div class="phases">
+        <div class="phase-card">
+          <div class="phase-num">Phase 1</div>
+          <h3>🐺 Pack Hunting</h3>
+          <p>
+            Same symbols adjacent (orthogonally) form a pack. 
+            The pack hunts weaker neighbors — the hunter jumps to the victim's cell 
+            and may recruit new members. Chains cascade until no more prey remains.
+          </p>
+        </div>
+
+        <div class="phase-card cannibalism">
+          <div class="phase-num">Phase 2</div>
+          <h3>💀 Cannibalism</h3>
+          <p>
+            When no prey is left, packs turn inward. Same-type symbols 
+            devour each other — the board contracts, survivors grow stronger. 
+            The background bleeds red. Only the fittest remain.
+          </p>
+        </div>
+
+        <div class="phase-card alpha">
+          <div class="phase-num">Phase 3</div>
+          <h3>🐺 Alpha Wolf</h3>
+          <p>
+            30% chance randomly during hunting: the alpha appears at a board edge 
+            and sweeps diagonally, devouring everything in its path. 
+            A single devastating strike that reshapes the entire outcome.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-label">Mathematics</div>
+      <h2>Inverse Optimization</h2>
+
+      <div class="formula-block">
+        <div class="formula">Score = Remaining × MaxChain</div>
+        <p class="formula-desc">
+          More survivors means higher base. Longer hunt chains multiply it. 
+          The tension: aggressive hunting clears prey but reduces remaining count. 
+          The optimal outcome is a controlled hunt — not a massacre.
+        </p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-value">96.3%</span>
+          <span class="stat-label">RTP</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value">50×</span>
+          <span class="stat-label">Max Win</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value">6 × 6</span>
+          <span class="stat-label">Grid</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>See It In Action</h2>
+      <p class="cta-desc">Watch packs form, hunt, and self-destruct in real time.</p>
+      <a href="sheldons-dream-game.html" class="play-btn">
+        ▶ Play Demo
+      </a>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <a href="index.html">← Uncloned Math</a>
+    </div>
+  </footer>
+
 </body>
 </html>
