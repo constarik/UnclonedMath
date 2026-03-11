@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -13,6 +13,62 @@
   
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
+                <style>
+    #sigma-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 0;
+    }
+    .landing { position: relative; z-index: 1; }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var canvas = document.createElement('canvas');
+      canvas.id = 'sigma-canvas';
+      document.body.appendChild(canvas);
+
+      var chars = { 'preamble.html': '\u03C2', 'projects.html': '\u03C3', 'services.html': '\u03A3' };
+      var colors = { 'preamble.html': '#e67e22', 'projects.html': '#00d4ff', 'services.html': '#f1c40f' };
+
+      function drawSigmas(ch, color) {
+        var W = window.innerWidth;
+        var H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, W, H);
+        ctx.font = 'bold 48px "Times New Roman", serif';
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.25;
+        var step = 120;
+        for (var x = 30; x < W; x += step) {
+          for (var y = 60; y < H; y += step) {
+            var angle = (Math.random() - 0.5) * Math.PI * 0.8;
+            ctx.save();
+            ctx.translate(x + Math.random()*30, y + Math.random()*30);
+            ctx.rotate(angle);
+            ctx.fillText(ch, 0, 0);
+            ctx.restore();
+          }
+        }
+      }
+
+      document.querySelectorAll('.landing-btn').forEach(function(btn) {
+        var href = btn.getAttribute('href');
+        btn.addEventListener('mouseenter', function() {
+          drawSigmas(chars[href] || '\u03C3', colors[href] || '#f1c40f');
+          canvas.style.opacity = '1';
+        });
+        btn.addEventListener('mouseleave', function() {
+          canvas.style.opacity = '0';
+        });
+      });
+    });
+  </script>
 </head>
 <body>
 
@@ -46,14 +102,14 @@
           <circle cx="0" cy="0" r="25" fill="none" stroke="url(#cyan)" stroke-width="1.5" stroke-dasharray="4 2"/>
           <circle cx="0" cy="0" r="15" fill="none" stroke="url(#cyan)" stroke-width="1"/>
           <text x="0" y="-2" font-family="Times New Roman, serif" font-size="28" font-weight="bold" 
-                fill="url(#gold)" text-anchor="middle" dominant-baseline="central">σ</text>
+                fill="url(#gold)" text-anchor="middle" dominant-baseline="central">&#963;</text>
         </g>
         <text x="240" y="85" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
               fill="#ffffff" text-anchor="middle" letter-spacing="2">UNCLONED</text>
         <text x="240" y="125" font-family="Georgia, serif" font-size="28" font-style="italic"
               fill="url(#gold)" text-anchor="middle" letter-spacing="6">MATH</text>
-        <text x="200" y="175" font-family="Arial, sans-serif" font-size="10" 
-              fill="#666666" text-anchor="middle" letter-spacing="2">ORIGINAL GAME MATHEMATICS</text>
+        <text x="240" y="175" font-family="Arial, sans-serif" font-size="10" 
+              fill="#00d4ff" text-anchor="middle" letter-spacing="2">ORIGINAL GAME MATHEMATICS</text>
       </svg>
     </div>
     
