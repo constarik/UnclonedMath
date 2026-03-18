@@ -32,8 +32,24 @@
     .testimonial-role{color:#00d4ff;font-size:.8rem;margin-top:.2rem}
     .testimonial-placeholder-text{color:#444;font-size:.9rem;font-style:italic}
     .testimonial-cta{margin-top:1.5rem;text-align:center}
-    .testimonial-btn{display:inline-block;padding:.7rem 1.5rem;background:transparent;border:1px solid #f1c40f55;color:#f1c40f;border-radius:8px;text-decoration:none;font-size:.9rem;transition:border-color .2s,background .2s}
+    .testimonial-btn{display:inline-block;padding:.7rem 1.5rem;background:transparent;border:1px solid #f1c40f55;color:#f1c40f;border-radius:8px;text-decoration:none;font-size:.9rem;transition:border-color .2s,background .2s;cursor:pointer}
     .testimonial-btn:hover{border-color:#f1c40f;background:#f1c40f11}
+    .testimonial-form-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center}
+    .testimonial-form-overlay.active{display:flex}
+    .testimonial-form-box{background:#0f0f1f;border:1px solid #2a2a4a;border-radius:12px;padding:2rem;width:90%;max-width:500px;position:relative}
+    .testimonial-form-box h3{color:#fff;margin-bottom:1.25rem;font-size:1.1rem}
+    .testimonial-form-box label{display:block;color:#888;font-size:.85rem;margin-bottom:.3rem;margin-top:.9rem}
+    .testimonial-form-box textarea,.testimonial-form-box input{width:100%;background:#080812;border:1px solid #2a2a4a;border-radius:6px;color:#fff;font-size:.9rem;padding:.6rem .8rem;font-family:inherit;resize:vertical}
+    .testimonial-form-box textarea{min-height:100px}
+    .testimonial-form-box textarea:focus,.testimonial-form-box input:focus{outline:none;border-color:#f1c40f55}
+    .testimonial-form-actions{display:flex;gap:.75rem;margin-top:1.25rem;justify-content:flex-end}
+    .btn-send{padding:.6rem 1.4rem;background:#f1c40f;color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:.9rem}
+    .btn-send:hover{background:#e6b800}
+    .btn-cancel{padding:.6rem 1.2rem;background:transparent;color:#888;border:1px solid #2a2a4a;border-radius:6px;cursor:pointer;font-size:.9rem}
+    .btn-cancel:hover{color:#fff;border-color:#444}
+    .form-close{position:absolute;top:.75rem;right:1rem;color:#555;font-size:1.2rem;cursor:pointer;background:none;border:none;line-height:1}
+    .form-close:hover{color:#fff}
+    .form-success{display:none;color:#00d4ff;text-align:center;padding:1rem 0;font-size:.95rem}
   </style>
 </head>
 <body>
@@ -142,9 +158,50 @@
       </div>
     </div>
     <div class="testimonial-cta">
-      <a href="mailto:constr@gmail.com?subject=Testimonial%20for%20Uncloned%20Math&body=Hi%20Constantin%2C%0A%0AHere%20is%20my%20testimonial%3A%0A%0A[your%20text]%0A%0AName%3A%0ARole%20%2F%20Company%3A" class="testimonial-btn">Leave a testimonial &#8594;</a>
+      <button class="testimonial-btn" onclick="document.getElementById('testimonialOverlay').classList.add('active')">Leave a testimonial &#8594;</button>
     </div>
   </section>
+
+  <!-- Testimonial form overlay -->
+  <div class="testimonial-form-overlay" id="testimonialOverlay">
+    <div class="testimonial-form-box">
+      <button class="form-close" onclick="document.getElementById('testimonialOverlay').classList.remove('active')">&times;</button>
+      <h3>Leave a testimonial</h3>
+      <div class="form-success" id="formSuccess">Thank you! Your testimonial has been received.</div>
+      <form id="testimonialForm" action="https://formspree.io/f/xwpbdlpk" method="POST">
+        <label>Your testimonial</label>
+        <textarea name="message" placeholder="Share your experience working with Uncloned Math..." required></textarea>
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Your name" required>
+        <label>Role / Company</label>
+        <input type="text" name="role" placeholder="e.g. CEO at GameStudio">
+        <input type="hidden" name="_subject" value="New testimonial for Uncloned Math">
+        <div class="testimonial-form-actions">
+          <button type="button" class="btn-cancel" onclick="document.getElementById('testimonialOverlay').classList.remove('active')">Cancel</button>
+          <button type="submit" class="btn-send">Send &#8594;</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('testimonialForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const res = await fetch(form.action, {method:'POST', body:data, headers:{Accept:'application/json'}});
+      if(res.ok) {
+        form.style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('testimonialOverlay').classList.remove('active');
+          form.style.display = 'block';
+          form.reset();
+          document.getElementById('formSuccess').style.display = 'none';
+        }, 3000);
+      }
+    });
+  </script>
 
   <section>
     <h2 class="section-title">Contact</h2>
