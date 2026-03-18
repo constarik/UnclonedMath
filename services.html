@@ -168,14 +168,16 @@
       <button class="form-close" onclick="document.getElementById('testimonialOverlay').classList.remove('active')">&times;</button>
       <h3>Leave a testimonial</h3>
       <div class="form-success" id="formSuccess">Thank you! Your testimonial has been received.</div>
-      <form id="testimonialForm" action="https://formspree.io/f/xwpbdlpk" method="POST">
+      <form id="testimonialForm" action="https://formsubmit.co/constr@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="New testimonial for Uncloned Math">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
         <label>Your testimonial</label>
         <textarea name="message" placeholder="Share your experience working with Uncloned Math..." required></textarea>
         <label>Name</label>
         <input type="text" name="name" placeholder="Your name" required>
         <label>Role / Company</label>
         <input type="text" name="role" placeholder="e.g. CEO at GameStudio">
-        <input type="hidden" name="_subject" value="New testimonial for Uncloned Math">
         <div class="testimonial-form-actions">
           <button type="button" class="btn-cancel" onclick="document.getElementById('testimonialOverlay').classList.remove('active')">Cancel</button>
           <button type="submit" class="btn-send">Send &#8594;</button>
