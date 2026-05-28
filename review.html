@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leave a Testimonial — Uncloned Math</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Leave a testimonial for Uncloned Math — original game mathematics.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KHNRNLL5W9"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-KHNRNLL5W9');</script>
+  <style>
+    .review-wrap{max-width:520px;margin:1.5rem auto 0}
+    .review-intro{color:#aaa;line-height:1.7;margin-bottom:1.5rem}
+    .testimonial-form-box{background:#0f0f1f;border:1px solid #2a2a4a;border-radius:12px;padding:2rem;position:relative}
+    .testimonial-form-box label{display:block;color:#888;font-size:.85rem;margin-bottom:.3rem;margin-top:.9rem}
+    .testimonial-form-box label:first-of-type{margin-top:0}
+    .testimonial-form-box textarea,.testimonial-form-box input{width:100%;box-sizing:border-box;background:#080812;border:1px solid #2a2a4a;border-radius:6px;color:#fff;font-size:.9rem;padding:.6rem .8rem;font-family:inherit;resize:vertical}
+    .testimonial-form-box textarea{min-height:100px}
+    .testimonial-form-box textarea:focus,.testimonial-form-box input:focus{outline:none;border-color:#f1c40f55}
+    .testimonial-form-actions{display:flex;gap:.75rem;margin-top:1.25rem;justify-content:flex-end}
+    .btn-send{padding:.6rem 1.4rem;background:#f1c40f;color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:.9rem}
+    .btn-send:hover{background:#e6b800}
+    .form-success{display:none;color:#00d4ff;text-align:center;padding:2rem 0;font-size:1rem;line-height:1.6}
+    .back-link{display:inline-block;margin-top:1.25rem;color:#888;font-size:.85rem;text-decoration:none}
+    .back-link:hover{color:#00d4ff}
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="brand">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" style="max-width:240px;height:auto;">
+      <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0a0a1a"/><stop offset="100%" style="stop-color:#1a1a2e"/></linearGradient>
+        <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f1c40f"/><stop offset="100%" style="stop-color:#e67e22"/></linearGradient>
+        <linearGradient id="cyan" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#00d4ff"/><stop offset="100%" style="stop-color:#0099cc"/></linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <rect width="400" height="200" fill="url(#bgGrad)" rx="12"/>
+      <g transform="translate(65,100)" filter="url(#glow)">
+        <circle cx="0" cy="0" r="35" fill="none" stroke="url(#cyan)" stroke-width="2"/>
+        <circle cx="0" cy="0" r="25" fill="none" stroke="url(#cyan)" stroke-width="1.5" stroke-dasharray="4 2"/>
+        <circle cx="0" cy="0" r="15" fill="none" stroke="url(#cyan)" stroke-width="1"/>
+        <text x="0" y="-2" font-family="Times New Roman,serif" font-size="28" font-weight="bold" fill="url(#gold)" text-anchor="middle" dominant-baseline="central">&#963;</text>
+      </g>
+      <text x="240" y="85" font-family="Arial Black,sans-serif" font-size="32" font-weight="900" fill="#fff" text-anchor="middle" letter-spacing="2">UNCLONED</text>
+      <text x="240" y="125" font-family="Georgia,serif" font-size="28" font-style="italic" fill="url(#gold)" text-anchor="middle" letter-spacing="6">MATH</text>
+      <text x="240" y="175" font-family="Arial,sans-serif" font-size="10" fill="#00d4ff" text-anchor="middle" letter-spacing="2">ORIGINAL GAME MATHEMATICS</text>
+    </svg>
+  </a>
+
+  <section>
+    <h2 class="section-title">Leave a Testimonial</h2>
+    <div class="review-wrap">
+      <p class="review-intro">Worked with Uncloned Math? A few words about the experience would mean a lot — and help others decide. Thank you for taking the time.</p>
+      <div class="testimonial-form-box">
+        <div class="form-success" id="formSuccess">Thank you! Your testimonial has been received.</div>
+        <form id="testimonialForm" action="https://formsubmit.co/constr@gmail.com" method="POST">
+          <input type="hidden" name="_subject" value="New testimonial for Uncloned Math">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_template" value="table">
+          <label>Your testimonial</label>
+          <textarea name="message" placeholder="Share your experience working with Uncloned Math..." required></textarea>
+          <label>Name</label>
+          <input type="text" name="name" placeholder="Your name" required>
+          <label>Role / Company</label>
+          <input type="text" name="role" placeholder="e.g. CEO at GameStudio">
+          <div class="testimonial-form-actions">
+            <button type="submit" class="btn-send">Send &#8594;</button>
+          </div>
+        </form>
+        <a href="index.html" class="back-link">&#8592; Back to Uncloned Math</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.getElementById('testimonialForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    try {
+      const res = await fetch(form.action, {method:'POST', body:data, headers:{Accept:'application/json'}});
+      if(res.ok){
+        form.style.display = 'none';
+        document.querySelector('.back-link').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+      } else {
+        alert('Something went wrong — please email constr@gmail.com directly.');
+      }
+    } catch(err){
+      alert('Something went wrong — please email constr@gmail.com directly.');
+    }
+  });
+</script>
+</body>
+</html>
