@@ -23,6 +23,10 @@
     .highlight-box{background:linear-gradient(135deg,#0a0a1a,#1a1a2e);border:1px solid #f1c40f33;border-radius:12px;padding:2rem;margin-top:1.5rem}
     .highlight-box p{color:#aaa;line-height:1.7;margin:0}
     .highlight-box strong{color:#f1c40f}
+    /* no global <a> rule on this page, so an unstyled link renders in the browser's
+       default dark blue - invisible on the #0a0a1a box. Match the gold accent. */
+    .highlight-box a{color:#f1c40f;text-decoration:none;border-bottom:1px solid #f1c40f66;transition:border-color .2s}
+    .highlight-box a:hover{border-bottom-color:#f1c40f}
     .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-top:1.5rem}
     .testimonial-card{background:#0f0f1f;border:1px solid #1e1e3f;border-radius:12px;padding:1.75rem;position:relative}
     .testimonial-card.placeholder{border-style:dashed;border-color:#2a2a4a;opacity:.6}
